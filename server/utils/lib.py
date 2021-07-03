@@ -48,7 +48,7 @@ class EnvParser:
         string = string.split('=')
         if len(string) < 2:
             raise ValueError(
-                f'file <{file}>:<{num}> - string <<{string0}>> is incorrect'
+                f'file "{file}" str {num+1}: string <{string0}> is incorrect'
             )
 
         if len(string) > 2:
