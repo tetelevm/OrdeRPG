@@ -1,5 +1,4 @@
-from server.utils.lib import Singleton
-from server.utils.exceptions import ExceptionFromFormattedDoc
+from server.utils.lib import Singleton, ExceptionFromFormattedDoc
 
 
 __all__ = [

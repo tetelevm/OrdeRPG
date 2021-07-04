@@ -1,3 +1,9 @@
+__all__ = [
+    'ExceptionFromDoc',
+    'ExceptionFromFormattedDoc',
+]
+
+
 class ExceptionFromDoc(Exception):
     """ Something went wrong """
     def __init__(self, msg=None):
@@ -17,7 +23,3 @@ class ExceptionFromFormattedDoc(ExceptionFromDoc):
             msg += self.__doc__ + '\n'
             msg += str(formats)
         super(ExceptionFromFormattedDoc, self).__init__(msg)
-
-
-class CoreException(ExceptionFromDoc):
-    __doc__ = ExceptionFromDoc.__doc__
