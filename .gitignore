@@ -1,4 +1,4 @@
 .envs
 .configs
-
+__pycache__
 .idea/

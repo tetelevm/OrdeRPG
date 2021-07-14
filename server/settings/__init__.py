@@ -19,6 +19,6 @@ __all__ = [
 
 
 envs = EnvParser()
-settings.test = envs.get_arg_from_env_file('test')
-settings.debug = envs.get_arg_from_env_file('debug')
-settings.production = envs.get_arg_from_env_file('production')
+settings.test = envs.get_arg_from_config_file('test')
+settings.debug = envs.get_arg_from_config_file('debug')
+settings.production = envs.get_arg_from_config_file('production')
