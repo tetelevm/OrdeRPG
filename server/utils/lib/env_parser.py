@@ -87,4 +87,4 @@ class EnvParser:
         return self.get_arg_from_file(name, '.envs', default)
 
     def get_arg_from_config_file(self, name: Union[str, iter], default: any = object) -> any:
-        return self.get_arg_from_file(name, '.config', default)
+        return self.get_arg_from_file(name, '.configs', default)
