@@ -12,7 +12,7 @@ class NoSettingError(ExceptionFromFormattedDoc):
     """ Setting <{}> is not available in the project settings """
 
 
-class Settings(metaclass=Singleton):
+class Settings(Singleton):
     def __init__(self):
         super(Settings, self).__init__()
         super(Settings, self).__setattr__('__settings', dict())

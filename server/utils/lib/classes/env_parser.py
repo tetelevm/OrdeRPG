@@ -2,7 +2,7 @@ import os
 import ast
 from typing import Union
 
-from .exceptions import ExceptionFromFormattedDoc
+from ..exceptions import ExceptionFromFormattedDoc
 
 
 __all__ = [
