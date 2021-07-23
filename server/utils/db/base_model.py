@@ -3,9 +3,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from server.utils.lib import camel_to_snake
 from .fields import IdField
 
+
 __all__ = [
-    'DefaultMeta',
+    'DefaultInfo',
     'DefaultBaseModelFunctionality',
+    'BaseModelMeta',
     'BaseModel',
 ]
 
@@ -13,54 +15,56 @@ __all__ = [
 ModelGenerator = declarative_base(name='ModelGenerator')
 
 
-class DefaultMeta:
+class DefaultInfo:
     tablename = None
     custom_pk = False
 
 
-class DefaultBaseModelFunctionality:
+class DefaultBaseModelFunctionality(object):
     id = IdField()
-    ZZZ = 123123
 
-    class Meta(DefaultMeta):
+    class Info(DefaultInfo):
         pass
 
 
-class ModelGeneratorMeta(type):
+class BaseModelMeta(type):
     def __new__(mcs, clsname, bases, dct):
         if clsname == 'BaseModel':
             return type.__new__(mcs, clsname, bases, dct)
 
         bases = tuple(set(bases) - {BaseModel})
-        dct = mcs.generate_dict(dct)
-        cls = type(clsname, bases, dct)
+        dct = mcs.generate_dict(dct, clsname)
 
-        cls = mcs.construct_class(cls)
-        return type(clsname, (cls, ModelGenerator), {})
+        cls = type(clsname, bases, {})
+        return type(clsname, (cls, ModelGenerator), dct)
 
     @staticmethod
-    def generate_dict(dct):
-        dbmf_dict = dict(DefaultBaseModelFunctionality.__dict__)
-        dbmf_dict.pop('__dict__')
-        dbmf_dict.pop('__weakref__')
+    def generate_dict(dct: dict, clsname: str) -> dict:
+        dbmf_dict = BaseModelMeta.get_default_funks()
+
+        info = dct.get('Info', DefaultInfo)
+
+        # Set tablename
+        tablename = getattr(info, 'tablename', None)
+        if tablename is None:
+            tablename = clsname.removesuffix('Model')
+            tablename = camel_to_snake(tablename)
+        dct['__tablename__'] = tablename
+
+        # Drop default pk
+        if getattr(info, 'custom_pk', False):
+            dbmf_dict.pop('id', None)
+
         dct = dbmf_dict | dct
         return dct
 
     @staticmethod
-    def construct_class(cls: type) -> type:
-        meta = cls.Meta
-
-        tablename = getattr(meta, 'tablename', None)
-        if tablename is None:
-            tablename = cls.__name__.removesuffix('Model')
-            tablename = camel_to_snake(tablename)
-        cls.__tablename__ = tablename
-
-        if getattr(meta, 'custom_pk', False):
-            del cls.id
-
-        return cls
+    def get_default_funks() -> dict:
+        dbmf_dict = dict(DefaultBaseModelFunctionality.__dict__)
+        dbmf_dict.pop('__dict__')
+        dbmf_dict.pop('__weakref__')
+        return dbmf_dict
 
 
-class BaseModel(metaclass=ModelGeneratorMeta):
+class BaseModel(metaclass=BaseModelMeta):
     pass
