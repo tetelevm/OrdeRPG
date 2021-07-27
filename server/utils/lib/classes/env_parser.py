@@ -1,6 +1,6 @@
 import os
 import ast
-from typing import Union
+from typing import Union, Iterable, Mapping
 
 from ..exceptions import ExceptionFromFormattedDoc
 from .singleton import Singleton
@@ -18,42 +18,48 @@ class EnvParser(Singleton):
     def __init__(self):
         self._files_cache = dict()
 
-    def _get_arg_from_dict(self, name, args_dict, default=object):
+    def _get_arg_from_dict(
+            self,
+            names: Union[str, Iterable[str]],
+            args_dict: Mapping,
+            default=object
+    ):
         correct_name = ''
         value = default
 
-        if isinstance(name, str):
-            name = [name]
+        if isinstance(names, str):
+            names = [names]
 
-        for maybe_name in name:
+        for maybe_name in names:
             if not isinstance(maybe_name, str):
                 raise ValueError(
                     f'{maybe_name} argument must be a <str>, not a {type(maybe_name)}')
 
+        for maybe_name in names:
             value = args_dict.get(maybe_name, object)
             if value is not object:
                 correct_name = maybe_name
                 break
 
         if value is object:
-            if len(name) == 1:
-                raise NameError(f'"{name[0]}" argument not found')
+            if len(names) == 1:
+                raise NameError(f'"{names[0]}" argument not found')
             else:
-                raise NameError(f'"{name}" arguments not found')
+                raise NameError(f'"{names}" arguments not found')
 
         try:
             return ast.literal_eval(value)
         except ValueError:
             raise self.IncorrectArgumentValueError(correct_name, value)
 
-    def _read_val_from_string(self, string0, num, file):
-        string = string0.lstrip().rstrip()
+    def _read_val_from_string(self, raw_string, num, file):
+        string = raw_string.lstrip().rstrip()
         if not string:
             return ()
 
         string = string.split('=')
         if len(string) < 2:
-            raise self.IncorrectStringError(file, num+1, string0)
+            raise self.IncorrectStringError(file, num+1, raw_string)
 
         if len(string) > 2:
             string = [string[0], '='.join(string[1:])]
@@ -78,11 +84,11 @@ class EnvParser(Singleton):
             self._read_file_into_cache(file_path)
         return self._get_arg_from_dict(name, self._files_cache[file_path], default)
 
-    def get_arg_from_env(self, name: Union[str, iter], default: any = object) -> any:
+    def get_arg_from_env(self, name: Union[str, Iterable[str]], default: any = object) -> any:
         return self._get_arg_from_dict(name, os.environ, default)
 
-    def get_arg_from_env_file(self, name: Union[str, iter], default: any = object) -> any:
+    def get_arg_from_env_file(self, name: Union[str, Iterable[str]], default: any = object) -> any:
         return self.get_arg_from_file(name, '.envs', default)
 
-    def get_arg_from_config_file(self, name: Union[str, iter], default: any = object) -> any:
+    def get_arg_from_config_file(self, name: Union[str, Iterable[str]], default: any = object) -> any:
         return self.get_arg_from_file(name, '.configs', default)
