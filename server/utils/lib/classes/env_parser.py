@@ -4,10 +4,8 @@ from typing import Union
 
 from ..exceptions import ExceptionFromFormattedDoc
 
+__all__ = ['EnvParser']
 
-__all__ = [
-    'EnvParser',
-]
 
 
 class EnvParser:

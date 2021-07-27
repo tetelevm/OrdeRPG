@@ -4,12 +4,15 @@ from server.utils.lib import camel_to_snake
 from .fields import IdField
 
 
+_all_ = [
+    'BaseModel',
+]
+
 __all__ = [
     'DefaultInfo',
     'DefaultBaseModelFunctionality',
     'BaseModelMeta',
-    'BaseModel',
-]
+] + _all_
 
 
 ModelGenerator = declarative_base(name='ModelGenerator')

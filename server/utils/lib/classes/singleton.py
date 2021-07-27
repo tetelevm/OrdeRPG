@@ -1,6 +1,4 @@
-__all__ = [
-    'Singleton',
-]
+__all__ = ['Singleton']
 
 
 class SingletonMeta(type):
