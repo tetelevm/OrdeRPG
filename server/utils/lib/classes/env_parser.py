@@ -3,12 +3,12 @@ import ast
 from typing import Union
 
 from ..exceptions import ExceptionFromFormattedDoc
+from .singleton import Singleton
 
 __all__ = ['EnvParser']
 
 
-
-class EnvParser:
+class EnvParser(Singleton):
     class IncorrectStringError(ExceptionFromFormattedDoc):
         """ File "{}" str {}: string <{}> is incorrect """
 
