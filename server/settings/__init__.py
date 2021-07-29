@@ -9,6 +9,7 @@ own settings, select the necessary file.
 from server.utils.lib import EnvParser
 from server.utils.settings import *
 
+from .init_scripts import *
 from .default import *
 
 

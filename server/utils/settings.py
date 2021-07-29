@@ -1,4 +1,5 @@
-from server.utils.lib import Singleton, ExceptionFromFormattedDoc
+from .lib import Singleton, ExceptionFromFormattedDoc
+from .lib.classes.hasher import Hasher
 
 
 __all__ = [
@@ -46,3 +47,4 @@ class Settings(Singleton):
 
 
 settings = Settings()
+settings.password_hasher = Hasher.hash
