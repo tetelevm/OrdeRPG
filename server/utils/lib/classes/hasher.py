@@ -5,7 +5,8 @@ from hashlib import shake_256 as _shake_256
 from ..exceptions import ExceptionFromFormattedDoc
 
 
-__all__ = ['Hasher']
+_all_ = ['Hasher']
+__all__ = _all_ + ['Shake']
 
 
 def bstring_cycle(bstring: bytes) -> Iterator[bytes]:

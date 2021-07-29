@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 
-from server.utils.lib import camel_to_snake
+from server.utils.lib.func import camel_to_snake
 from .fields import IdField
 
 
