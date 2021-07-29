@@ -12,9 +12,9 @@ _all_ = [
 ]
 
 __all__ = _all_ + [
-    'camel_to_snake',
     'int_to_bytes',
     'str_to_bytes',
+    'camel_to_snake',
 ]
 
 
@@ -48,7 +48,7 @@ _static_data_for_random = (
     str_to_bytes(os.environ)
 )
 
-def generate_random_string(length: int = 50, alphabet: Sequence = default_alphabet) -> str:
+def generate_random_string(length: int, alphabet: Sequence = default_alphabet) -> str:
     random_params = (
         str_to_bytes(time.time().hex()) +
         int_to_bytes(random.getrandbits(50)) +
@@ -66,5 +66,5 @@ def generate_random_string(length: int = 50, alphabet: Sequence = default_alphab
 
 advanced_alphabet = default_alphabet + '`~!@#$%^&*()-_=+[{]};:\'"/?.>,<\\|'
 
-def generate_random_advanced_string(length: int = 50) -> str:
+def generate_random_advanced_string(length: int) -> str:
     return generate_random_string(length, advanced_alphabet)
