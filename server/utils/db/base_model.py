@@ -1,7 +1,8 @@
+from pydantic import create_model as create_pydantic_model
 from sqlalchemy.ext.declarative import declarative_base
 
 from server.utils.lib.func import camel_to_snake
-from .fields import IdField
+from .fields import FieldDefault, IdField
 
 
 _all_ = [
@@ -25,6 +26,7 @@ class DefaultInfo:
 
 class DefaultBaseModelFunctionality(object):
     id = IdField()
+    __pynotation__ = create_pydantic_model('__default_model')
 
     class Info(DefaultInfo):
         pass
@@ -57,6 +59,9 @@ class BaseModelMeta(type):
         dbmf_dict = cls._drop_default_pk(info, dbmf_dict)
 
         dct = dbmf_dict | dct
+
+        dct['__pynotation__'] = cls._generate_pydantic_model(dct)
+
         return dct
 
     @staticmethod
@@ -72,6 +77,22 @@ class BaseModelMeta(type):
         if getattr(info, 'custom_pk', False):
             dbmf_dict.pop('id', None)
         return dbmf_dict
+
+    @staticmethod
+    def _generate_pydantic_model(dct: dict) -> type:
+        fields = dict()
+        for (name, field) in dct.items():
+            if not isinstance(field, FieldDefault):
+                continue
+
+            py_type = field.type.python_type
+            default = None
+            if field.default is None and not field.nullable:
+                default = ...
+
+            fields[name] = (py_type, default)
+
+        return create_pydantic_model(dct['__tablename__'], **fields)
 
 
 class BaseModel(metaclass=BaseModelMeta):
