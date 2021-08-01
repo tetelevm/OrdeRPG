@@ -1,3 +1,7 @@
+"""
+A submodule with individual classes.
+"""
+
 from .env_parser import __all__ as __env_parser_all__
 from .hasher import _all_ as __hasher_all__
 from .singleton import __all__ as __singleton_all__

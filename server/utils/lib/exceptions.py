@@ -5,7 +5,8 @@ __all__ = [
 
 
 class ExceptionFromDoc(Exception):
-    """ Something went wrong """
+    __doc__ = """ Something went wrong """
+
     def __init__(self, msg=None):
         if msg is None:
             msg = self.__doc__
@@ -20,8 +21,8 @@ class ExceptionFromFormattedDoc(ExceptionFromDoc):
             msg = self.__doc__.format(*formats)
         except IndexError:
             msg = 'The error could not be formatted, but an error of the form'
-            msg += ' \n '
+            msg += '\n'
             msg += self.__doc__
-            msg += ' \n '
+            msg += '\n'
             msg += str(formats)
         super(ExceptionFromFormattedDoc, self).__init__(msg)

@@ -1,3 +1,7 @@
+"""
+Models to be stored in the database.
+"""
+
 from .user import __all__ as __user_all__
 from .user import *
 

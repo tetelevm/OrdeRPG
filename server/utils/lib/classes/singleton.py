@@ -1,8 +1,13 @@
+"""
+Basic implementation of the singleton pattern
+"""
+# The concrete implementation is taken from the first link `python singleton`
+
 __all__ = ['Singleton']
 
 
 class SingletonMeta(type):
-    _instances = {}
+    _instances = dict()
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:

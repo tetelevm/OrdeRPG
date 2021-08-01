@@ -1,8 +1,9 @@
 """
-All system settings.
+Configures the project settings logic, such as the installation order
+and the need for settings.
 
-The settings are logically divided into files, if you want to add your
-own settings, select the necessary file.
+You should not write any settings here unless they directly affect the
+logic of the other settings.
 """
 
 

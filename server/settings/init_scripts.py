@@ -1,3 +1,8 @@
+"""
+If you need to execute any scripts when initializing a project, you are
+welcome to do so here.
+"""
+
 from server.utils.lib import EnvParser, Hasher
 
 __all__ = []

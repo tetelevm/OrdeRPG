@@ -1,6 +1,6 @@
 """
-Does not import or use any functions or constants from other parts of
-the system. Only the standard library is imported here.
+A module with basic structures that use only pure Python or a standard
+library.
 """
 
 from .classes import __all__ as __classes_all__
