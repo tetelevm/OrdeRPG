@@ -9,7 +9,12 @@ from typing import Union, Iterable, Mapping
 from ..exceptions import ExceptionFromFormattedDoc
 from .singleton import Singleton
 
-__all__ = ['EnvParser']
+_all_ = ['env_parser']
+
+__all__ = _all_ + ['EnvParser']
+
+
+STR_OR_ITER = Union[str, Iterable[str]]
 
 
 class EnvParser(Singleton):
@@ -25,12 +30,8 @@ class EnvParser(Singleton):
     def __init__(self):
         self._files_cache = dict()
 
-    def _get_arg_from_dict(
-            self,
-            names: Union[str, Iterable[str]],
-            args_dict: Mapping,
-            default=object
-    ):
+    @classmethod
+    def _get_arg_from_dict(cls, names: STR_OR_ITER, args_dict: Mapping, default=object):
         correct_name = ''
         value = default
 
@@ -57,16 +58,17 @@ class EnvParser(Singleton):
         try:
             return ast.literal_eval(value)
         except ValueError:
-            raise self.IncorrectArgumentValueError(correct_name, value)
+            raise cls.IncorrectArgumentValueError(correct_name, value)
 
-    def _read_val_from_string(self, raw_string, num, file):
+    @classmethod
+    def _read_val_from_string(cls, raw_string: str, num: int, file):
         string = raw_string.lstrip().rstrip()
-        if not string:
+        if not string or string.startswith('#'):
             return ()
 
         string = string.split('=')
         if len(string) < 2:
-            raise self.IncorrectStringError(file, num+1, raw_string)
+            raise cls.IncorrectStringError(file, num+1, raw_string)
 
         if len(string) > 2:
             string = [string[0], '='.join(string[1:])]
@@ -91,11 +93,14 @@ class EnvParser(Singleton):
             self._read_file_into_cache(file_path)
         return self._get_arg_from_dict(name, self._files_cache[file_path], default)
 
-    def get_arg_from_env(self, name: Union[str, Iterable[str]], default: any = object) -> any:
+    def get_arg_from_environ(self, name: STR_OR_ITER, default: any) -> any:
         return self._get_arg_from_dict(name, os.environ, default)
 
-    def get_arg_from_env_file(self, name: Union[str, Iterable[str]], default: any = object) -> any:
+    def get_arg_from_envs_file(self, name: STR_OR_ITER, default: any) -> any:
         return self.get_arg_from_file(name, '.envs', default)
 
-    def get_arg_from_config_file(self, name: Union[str, Iterable[str]], default: any = object) -> any:
+    def get_arg_from_configs_file(self, name: STR_OR_ITER, default: any) -> any:
         return self.get_arg_from_file(name, '.configs', default)
+
+
+env_parser = EnvParser()
