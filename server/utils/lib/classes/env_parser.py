@@ -1,3 +1,7 @@
+"""
+A class for parsing environment variables from `os.environ` or from files.
+"""
+
 import os
 import ast
 from typing import Union, Iterable, Mapping
@@ -9,9 +13,12 @@ __all__ = ['EnvParser']
 
 
 class EnvParser(Singleton):
+    # Incorrect string in the variable file
     class IncorrectStringError(ExceptionFromFormattedDoc):
         """ File "{}" str {}: string <{}> is incorrect """
 
+    # If the argument from the environment variables is incorrect
+    # For example: `object`, `list()`, `[a % 2 for a in [1, 2, 3, 4]]`
     class IncorrectArgumentValueError(ExceptionFromFormattedDoc):
         """ The "{}" env argument cannot have the value <{}> """
 
