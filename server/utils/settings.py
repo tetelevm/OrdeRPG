@@ -36,9 +36,9 @@ class Settings(Singleton):
     P.S. The `settings.NoSettingError` attribute cannot be assigned.
     """
 
-    # Custom exceptions for in case a certain setting is missing
     class NoSettingError(ExceptionFromFormattedDoc):
-        """ Setting <{}> is not available in the project settings """
+        """Custom exceptions for in case a certain setting is missing."""
+        __doc__ = """Setting <{}> is not available in the project settings"""
 
     def __init__(self):
         super(Settings, self).__init__()
