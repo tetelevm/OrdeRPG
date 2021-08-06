@@ -1,3 +1,7 @@
+"""
+The submodule contains useful utilities for exceptions.
+"""
+
 __all__ = [
     'ExceptionFromDoc',
     'ExceptionFromFormattedDoc',
