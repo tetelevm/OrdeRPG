@@ -39,3 +39,12 @@ You can import the `CommonClass`
 But you can only import the `SpecificClass` as
     `from smth.file import SpecificClass`
 """
+
+from .db import __all__ as __db_all__
+from .lib import __all__ as __lib_all__
+
+from .db import *
+from .lib import *
+
+
+__all__ = __lib_all__ + __db_all__

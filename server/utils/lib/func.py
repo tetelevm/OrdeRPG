@@ -16,7 +16,6 @@ _all_ = [
     'generate_random_advanced_string',
     'with_randomize',
 ]
-
 __all__ = _all_ + [
     'int_to_bytes',
     'str_to_bytes',
@@ -60,6 +59,11 @@ def with_randomize(funk):
     )
 
     def randomize(*args, **kwargs):
+        """
+        A function that sets a (fairly absolute) random value to random
+        before calling the function. After it is called, it returns
+        random to the system-random value.
+        """
         # Calculated each time the function is called
         random_params = (
             str_to_bytes(time.time().hex()) +

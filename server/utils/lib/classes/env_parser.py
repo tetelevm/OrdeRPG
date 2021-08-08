@@ -7,21 +7,18 @@ import ast
 from typing import Union, Iterable, Mapping
 
 from ..exceptions import ExceptionFromFormattedDoc
-from .singleton import Singleton
 
 
 _all_ = ['env_parser']
-
 __all__ = _all_ + ['EnvParser']
 
 
 STR_OR_ITER = Union[str, Iterable[str]]
 FROM_STRING_TYPE = tuple[Union[tuple[str, str], tuple], bool]
-
 DEFAULT_OBJ = object()
 
 
-class EnvParser(Singleton):
+class EnvParser:
     """
     A class that collects and defines an environment variable.
 
