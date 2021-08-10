@@ -1,18 +1,11 @@
 """
 The file contains a singleton class of settings.
-
-This class is minimally configurable here, but the main business settings
-should take place in a special sub-module in the application.
 """
 
-from .lib import Singleton, ExceptionFromFormattedDoc
-from .lib.classes.hasher import Hasher
+from server.utils.lib import Singleton, ExceptionFromFormattedDoc
 
 
-__all__ = [
-    'Settings',
-    'settings',
-]
+__all__ = ['Settings']
 
 
 class Settings(Singleton):
@@ -22,6 +15,7 @@ class Settings(Singleton):
     Translates all attributes when set/get to `.lower()`,
     calls `NoSettingError` when missing.
 
+    >>> settings = Settings()
     >>> settings.smth = 123
     >>> settings.smth  # 123
     >>> settings.SmTh  # 123
@@ -71,8 +65,3 @@ class Settings(Singleton):
     def __contains__(self, attr: str) -> bool:
         attr = attr.lower()
         return attr in self.__settings
-
-
-# A instance of the object and its minimal configuration
-settings = Settings()
-settings.password_hasher = Hasher.hash
