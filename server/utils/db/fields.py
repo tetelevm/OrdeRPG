@@ -11,8 +11,8 @@ from abc import ABC, abstractmethod
 from sqlalchemy import Column, BigInteger, String, DateTime
 from sqlalchemy.sql.visitors import TraversibleType
 
-from ..lib import generate_random_advanced_string
-from ..settings import settings
+from server.utils.lib import generate_random_advanced_string
+from server.utils.settings import settings
 
 
 _all_ = [

@@ -5,21 +5,26 @@ from server.utils.lib.func import camel_to_snake
 from .fields import FieldDefault, IdField
 
 
-_all_ = [
-    'BaseModel',
-]
-
-__all__ = [
+_all_ = ['BaseModel']
+__all__ = _all_ + [
     'DefaultInfo',
     'DefaultBaseModelFunctionality',
     'BaseModelMeta',
-] + _all_
+]
 
 
 ModelGenerator = declarative_base(name='ModelGenerator')
 
 
 class DefaultInfo:
+    """
+    A class that contains meta-information about model.
+
+    The name could (and would be more logical) be `Meta` instead of
+    `Info`, but in this case it could be confused with the name of some
+    metaclass.
+    """
+
     tablename = None
     custom_pk = False
 
