@@ -1,5 +1,6 @@
 from pydantic import create_model as create_pydantic_model
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from server.utils.lib.func import camel_to_snake
 from .fields import FieldDefault, IdField
@@ -37,16 +38,10 @@ class DefaultBaseModelFunctionality(object):
         pass
 
 
-class BaseModelMeta(type):
+class BaseModelMeta(DeclarativeMeta):
     def __new__(mcs, clsname, bases, dct):
-        if clsname == 'BaseModel':
-            return type.__new__(mcs, clsname, bases, dct)
-
-        bases = tuple(set(bases) - {BaseModel})
         dct = mcs.generate_dict(dct, clsname)
-
-        cls = type(clsname, bases, {})
-        return type(clsname, (cls, ModelGenerator), dct)
+        return super(BaseModelMeta, mcs).__new__(mcs, clsname, bases, dct)
 
     @staticmethod
     def get_default_funks() -> dict:
@@ -100,5 +95,6 @@ class BaseModelMeta(type):
         return create_pydantic_model(dct['__tablename__'], **fields)
 
 
-class BaseModel(metaclass=BaseModelMeta):
-    pass
+class BaseModel(ModelGenerator, metaclass=BaseModelMeta):
+    """A class for inheritance, passes the creation to its metaclass."""
+    __abstract__ = True
