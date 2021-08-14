@@ -183,16 +183,24 @@ class EnvParser:
         A wrapper around `.get_arg_from_file()` that sets up '.envs' file
         in the `file_path` variable in advance.
         """
+        settings = getattr(self, 'settings', None)
+        if settings is None:
+            raise FileNotFoundError("Unknown location of file '.envs'")
 
-        return self.get_arg_from_file(name, '.envs', *args, **kwargs)
+        file = settings.home_path / '.envs'
+        return self.get_arg_from_file(name, file, *args, **kwargs)
 
     def get_arg_from_configs_file(self, name: STR_OR_ITER, *args, **kwargs) -> any:
         """
         A wrapper around `.get_arg_from_file()` that sets up '.configs'
         file in the `file_path` variable in advance.
         """
+        settings = getattr(self, 'settings', None)
+        if settings is None:
+            raise FileNotFoundError("Unknown location of file '.configs'")
 
-        return self.get_arg_from_file(name, '.configs', *args, **kwargs)
+        file = settings.home_path / '.configs'
+        return self.get_arg_from_file(name, file, *args, **kwargs)
 
 
 env_parser = EnvParser()

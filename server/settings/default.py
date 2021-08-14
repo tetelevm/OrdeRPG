@@ -9,5 +9,5 @@ __all__ = []
 
 
 # Directory with `main.py`
-s.home_path = Path().resolve()
+s.home_path = Path(__file__).parent.parent.parent
 s.server_path = (Path() / 'server').resolve()
