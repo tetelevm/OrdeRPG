@@ -20,6 +20,8 @@ __all__ = _all_ + [
     'int_to_bytes',
     'str_to_bytes',
     'camel_to_snake',
+    'default_alphabet',
+    'advanced_alphabet',
 ]
 
 
