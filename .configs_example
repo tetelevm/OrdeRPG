@@ -1,0 +1,7 @@
+# An example of a configuration file
+
+production = True
+debug = False
+test = False
+
+hash_algorithms = ['blake2b', 'sha3_256']
