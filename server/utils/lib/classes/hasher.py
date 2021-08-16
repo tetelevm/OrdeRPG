@@ -127,16 +127,18 @@ class Hasher:
         if algorithms is None:
             algorithms = ['sha3_384', 'blake2b']
 
-        cls.hash_algs = [
+        algorithms = [
             cls.supported_algorithms.get(algorithm, algorithm)
             for algorithm in algorithms
         ]
 
         try:
-            for alg in cls.hash_algs:
+            for alg in algorithms:
                 _ = alg(b'Testing all algorithms for errors').digest()
         except (AttributeError, TypeError) as error:
             raise cls.IncorrectAlgorithm(alg.__repr__(), ', '.join(error.args))
+
+        cls.hash_algs = algorithms
 
     def __init__(self, string: str, salt: str = '', pepper: str = '', count=10 ** 5):
         self.string = bytes(string, encoding='utf-8')
