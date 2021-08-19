@@ -3,7 +3,7 @@ If you need to execute any scripts when initializing a project, you are
 welcome to do so here.
 """
 
-from server.utils import Hasher, env_parser
+from server.lib import Hasher, env_parser
 
 
 __all__ = []
