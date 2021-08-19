@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase
 
-from server.utils.lib.func import *
+from server.lib import *
 
 
 class Test(TestCase):

@@ -2,8 +2,8 @@ import os
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
-from server.utils.lib.classes import *
-from server.utils.lib.classes.hasher import Hasher, Shake, bstring_cycle
+from server.lib.classes import *
+from server.lib.classes.hasher import Hasher, Shake, bstring_cycle
 
 
 class Test(TestCase):

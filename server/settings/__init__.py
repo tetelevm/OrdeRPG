@@ -6,7 +6,7 @@ You should not write any settings here unless they directly affect the
 logic of the other settings.
 """
 
-from server.utils.lib.classes.env_parser import env_parser as envs
+from server.lib.classes import env_parser as envs
 from server.utils.settings import settings
 
 

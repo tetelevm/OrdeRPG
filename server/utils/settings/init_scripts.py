@@ -2,8 +2,8 @@
 Executes the initial initialization of the project settings.
 """
 
-from ..lib.classes.hasher import Hasher
-from ..lib.classes.env_parser import env_parser
+from server.lib.classes.hasher import Hasher
+from server.lib.classes.env_parser import env_parser
 
 from .settings import Settings
 

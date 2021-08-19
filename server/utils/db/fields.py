@@ -13,7 +13,7 @@ from sqlalchemy.sql.sqltypes import BigInteger, String, DateTime
 from sqlalchemy.sql.visitors import TraversibleType
 from sqlalchemy.sql.type_api import TypeEngine
 
-from server.utils.lib import generate_random_advanced_string
+from server.lib import generate_random_advanced_string
 from server.utils.settings import settings
 
 

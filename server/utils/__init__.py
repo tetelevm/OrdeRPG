@@ -41,10 +41,10 @@ But you can only import the `SpecificClass` as
 """
 
 from .db import __all__ as __db_all__
-from .lib import __all__ as __lib_all__
+from .settings import __all__ as __settings_all__
 
 from .db import *
-from .lib import *
+from .settings import *
 
 
-__all__ = __lib_all__ + __db_all__
+__all__ = __db_all__ + __settings_all__

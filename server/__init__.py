@@ -4,7 +4,6 @@ the project.
 """
 
 from server.settings import *
-from server.db import *
 
 
 def start():

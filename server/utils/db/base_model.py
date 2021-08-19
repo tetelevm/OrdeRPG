@@ -7,7 +7,7 @@ from pydantic import create_model as create_pydantic_model
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 
-from server.utils.lib.func import camel_to_snake
+from server.lib import camel_to_snake
 from .fields import FieldDefault, IdField
 
 
