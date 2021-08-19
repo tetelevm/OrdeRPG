@@ -4,7 +4,7 @@ user's business data.
 """
 
 from sqlalchemy import func
-from server.utils.db import (
+from server.framework.db import (
     BaseModel, StringField, DateTimeField, RandomStringField, PasswordField,
 )
 

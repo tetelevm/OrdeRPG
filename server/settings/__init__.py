@@ -7,7 +7,7 @@ logic of the other settings.
 """
 
 from server.lib.classes import env_parser as envs
-from server.utils.settings import settings
+from server.framework.settings import settings
 
 
 __all__ = ['settings']

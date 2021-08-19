@@ -14,7 +14,7 @@ from sqlalchemy.sql.visitors import TraversibleType
 from sqlalchemy.sql.type_api import TypeEngine
 
 from server.lib import generate_random_advanced_string
-from server.utils.settings import settings
+from ..settings import settings
 
 
 _all_ = [

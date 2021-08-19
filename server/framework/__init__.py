@@ -7,7 +7,7 @@ basic libraries and facilitates the construction of the main application.
 
 Only the standard library and pip-installed modules can be imported into
 this module. The module must be completely self-contained and must not
-have any backward linkage to any of the files outside of `utils`.
+have any backward linkage to any of the files outside of `framework`.
 
 In the files of this module you can see the `_all_` variables (in
 addition to `__all__`). This is done to keep the namespace cleaner in the

@@ -3,7 +3,7 @@ Settings that should always be set, regardless of the others.
 """
 
 from pathlib import Path
-from server.utils.settings import settings as s
+from server.framework.settings import settings as s
 
 __all__ = []
 
