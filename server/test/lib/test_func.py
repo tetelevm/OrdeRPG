@@ -1,10 +1,13 @@
 import random
 from unittest import TestCase
 
-from server.lib import *
+from server.lib.func import *
 
 
-class Test(TestCase):
+__all__ = ['FuncTest']
+
+
+class FuncTest(TestCase):
     def test_int_to_bytes(self):
         self.assertEqual(int_to_bytes(255), b'\xff')
         self.assertEqual(int_to_bytes(0), b'')

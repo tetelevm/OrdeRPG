@@ -6,7 +6,10 @@ from server.lib.classes import *
 from server.lib.classes.hasher import Hasher, Shake, bstring_cycle
 
 
-class Test(TestCase):
+__all__ = ['ClassesTest']
+
+
+class ClassesTest(TestCase):
     def test_env_parser(self):
         os.environ['TEST_VALUE'] = '[1, 2, 3, 4]'
         self.assertEqual(
