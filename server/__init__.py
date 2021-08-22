@@ -4,10 +4,6 @@ the project.
 """
 
 from server.settings import *
+from server.db import *
 
-
-def start():
-    """
-    The function that is passed to the `main.py` file
-    """
-    ...
+from server.framework.start_script import *

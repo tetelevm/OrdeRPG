@@ -11,4 +11,10 @@ from .settings import Settings
 settings = Settings()
 settings.password_hasher = Hasher.hash
 
+settings.database = {
+    'name': 'sqlite://'
+}
+
+# Backref and another config
+
 env_parser.settings = settings
