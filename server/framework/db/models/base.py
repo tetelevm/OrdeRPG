@@ -1,6 +1,6 @@
 """
 File with the model for inheritance in other database models. Also here is
-the metaclass that generates the models, and the default model settings.
+the metaclass that generates the models.
 """
 
 from pydantic import create_model as create_pydantic_model
@@ -8,47 +8,18 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from server.lib import camel_to_snake
-from .fields import FieldDefault, IdField
+from .default import DefaultInfo, DefaultBaseModelFunctionality
+from ..fields import FieldDefault
 
 
 _all_ = ['BaseModel']
 __all__ = _all_ + [
-    'DefaultInfo',
-    'DefaultBaseModelFunctionality',
     'BaseModelMeta',
+    'ModelWorker',
 ]
 
 
-ModelGenerator = declarative_base(name='ModelGenerator')
-
-
-class DefaultInfo:
-    """
-    A class that contains meta-information about model.
-
-    The name could (and would be more logical) be `Meta` instead of
-    `Info`, but in this case it could be confused with the name of some
-    metaclass.
-    """
-
-    tablename = None
-    custom_pk = False
-
-
-class DefaultBaseModelFunctionality:
-    """
-    A class with standard model settings.
-
-    It could have been passed to `declarative_base`, but it was done that
-    way for more convenience in generating other models.
-    """
-
-    id = IdField()
-    __pynotation__ = create_pydantic_model('__default_model')
-
-    class Info(DefaultInfo):
-        """Instance of standard Info."""
-        pass
+ModelWorker = declarative_base(name='ModelGenerator')
 
 
 class BaseModelMeta(DeclarativeMeta):
@@ -145,6 +116,6 @@ class BaseModelMeta(DeclarativeMeta):
         return create_pydantic_model(dct['__tablename__'], **fields)
 
 
-class BaseModel(ModelGenerator, metaclass=BaseModelMeta):
+class BaseModel(ModelWorker, metaclass=BaseModelMeta):
     """A class for inheritance, passes the creation to its metaclass."""
     __abstract__ = True
