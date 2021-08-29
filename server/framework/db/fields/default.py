@@ -64,7 +64,6 @@ class FieldDefault(Column, metaclass=FieldDefaultMeta):
 
     column_type = TypeEngine
     _default_kwargs = dict()
-    __visit_name__ = "field"
 
     def __init__(self, **kwargs):
         kwargs = self._default_kwargs | kwargs
