@@ -126,3 +126,13 @@ class BaseModelMeta(DeclarativeMeta):
 class BaseModel(ModelWorker, metaclass=BaseModelMeta):
     """A class for inheritance, passes the creation to its metaclass."""
     __abstract__ = True
+
+    def __init__(self, *args, **kwargs):
+        for (name, field_class) in self.__fields__.items():
+            if isinstance(field_class, FieldExecutableInterface):
+                if name in kwargs.keys():
+                    kwargs[name] = field_class.execute(kwargs[name])
+                elif not field_class.need_argument:
+                    kwargs[name] = field_class.execute()
+
+        super().__init__(*args, **kwargs)
