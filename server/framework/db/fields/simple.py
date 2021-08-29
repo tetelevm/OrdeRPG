@@ -40,6 +40,24 @@ class IdField(IntegerField):
     }
 
 
+class FloatField(FieldDefault):
+    """Standard field of type Float."""
+    column_type = Float
+
+
+class CoefficientField(FloatField, FieldExecutableInterface):
+    """A field for storing Float type coefficients."""
+
+    def __init__(self, min_value=0., max_value=1., *args, **kwargs):
+        self.min_value = min_value
+        self.max_value = max_value
+        super().__init__(*args, **kwargs)
+
+    def execute(self, *args, **kwargs):
+        value = kwargs.get('value', 0)
+        return min(self.max_value, max(value, self.min_value))
+
+
 class StringField(FieldDefault):
     """
     Standard field with type String.
