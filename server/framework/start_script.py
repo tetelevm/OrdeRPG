@@ -1,5 +1,5 @@
 from .db.models import ModelWorker
-from .db.connection import Engine
+from .db.connection import DbEngine
 
 
-ModelWorker.metadata.create_all(Engine)
+ModelWorker.metadata.create_all(DbEngine)
