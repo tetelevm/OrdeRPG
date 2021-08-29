@@ -4,9 +4,9 @@ from sqlalchemy.orm import sessionmaker
 from ..settings import settings
 
 
-__all__ = ['Engine', 'SessionCreator']
+__all__ = ['Engine', 'Session']
 
 
 Engine = create_engine(settings.database['name'], echo=False)
 
-SessionCreator = sessionmaker()
+Session = sessionmaker(bind=Engine)
