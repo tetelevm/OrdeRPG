@@ -9,7 +9,7 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from server.lib import camel_to_snake
 from .default import DefaultInfo, DefaultBaseModelFunctionality
-from ..fields import FieldDefault
+from ..fields import FieldDefault, FieldExecutableInterface
 
 
 _all_ = ['BaseModel']
@@ -27,7 +27,8 @@ class BaseModelMeta(DeclarativeMeta):
     The main metaclass for generating database models.
 
     - injects standard data from `DefaultBaseModelFunctionality`
-    - creates a `pydantic` model
+    - save data about fields on `__fields__`
+    - creates a `pydantic` model on `__pydantic__`
     - set `__tablename__
     """
 
@@ -36,7 +37,7 @@ class BaseModelMeta(DeclarativeMeta):
         return super(BaseModelMeta, mcs).__new__(mcs, clsname, bases, dct)
 
     @classmethod
-    def generate_dict(cls, dct: dict, clsname: str) -> dict:
+    def generate_dict(mcs, dct: dict, clsname: str) -> dict:
         """
         The main method of the class. Executes all necessary logic on
         the new model class.
@@ -45,12 +46,13 @@ class BaseModelMeta(DeclarativeMeta):
         dbmf_dict = BaseModelMeta.get_default_model_dict()
         info = dct.get('Info', DefaultInfo)
 
-        dct['__tablename__'] = cls._generate_tablename(info, clsname)
+        dct['__tablename__'] = mcs._generate_tablename(info, clsname)
 
-        dbmf_dict = cls._drop_default_pk(info, dbmf_dict)
+        dbmf_dict = mcs._drop_default_pk(info, dbmf_dict)
         dct = dbmf_dict | dct
 
-        dct['__pynotation__'] = cls._generate_pydantic_model(dct)
+        dct['__fields__'] = mcs._duplicate_fields_value(dct)
+        dct['__pydantic__'] = mcs._generate_pydantic_model(dct)
 
         return dct
 
@@ -96,22 +98,27 @@ class BaseModelMeta(DeclarativeMeta):
         return dbmf_dict
 
     @staticmethod
+    def _duplicate_fields_value(dct: dict) -> dict:
+        fields = {
+            name: field
+            for (name, field) in dct.items()
+            if isinstance(field, FieldDefault)
+        }
+        return fields
+
+    @staticmethod
     def _generate_pydantic_model(dct: dict) -> type:
         """Generates a `pydantic` model based on class field types."""
         # The basis of the code is taken from
         # https://github.com/tiangolo/pydantic-sqlalchemy/blob/master/pydantic_sqlalchemy/main.py
 
         fields = dict()
-        for (name, field) in dct.items():
-            if not isinstance(field, FieldDefault):
-                continue
-
-            py_type = field.type.python_type
+        for (name, field) in dct['__fields__'].items():
             default = None
             if field.default is None and not field.nullable:
                 default = ...
 
-            fields[name] = (py_type, default)
+            fields[name] = (field.type.python_type, default)
 
         return create_pydantic_model(dct['__tablename__'], **fields)
 

@@ -31,8 +31,10 @@ class DefaultBaseModelFunctionality:
     way for more convenience in generating other models.
     """
 
+    __fields__ = dict()
+    __pydantic__ = create_pydantic_model('__default_model')
+
     id = IdField()
-    __pynotation__ = create_pydantic_model('__default_model')
 
     class Info(DefaultInfo):
         """Instance of standard Info."""
