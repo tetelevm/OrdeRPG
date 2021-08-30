@@ -31,7 +31,6 @@ class DefaultBaseModelFunctionality:
     way for more convenience in generating other models.
     """
 
-    __fields__ = dict()
     __pydantic__ = create_pydantic_model('__default_model')
 
     id = IdField(name='id')

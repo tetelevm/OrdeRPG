@@ -27,7 +27,6 @@ class BaseModelMeta(DeclarativeMeta):
     The main metaclass for generating database models.
 
     - injects standard data from `DefaultBaseModelFunctionality`
-    - save data about fields on `__fields__`
     - creates a `pydantic` model on `__pydantic__`
     - set `__tablename__
     """
@@ -51,7 +50,6 @@ class BaseModelMeta(DeclarativeMeta):
         dbmf_dict = mcs._drop_default_pk(info, dbmf_dict)
         dct = dbmf_dict | dct
 
-        dct['__fields__'] = mcs._duplicate_fields_value(dct)
         dct['__pydantic__'] = mcs._generate_pydantic_model(dct)
 
         return dct
@@ -98,22 +96,19 @@ class BaseModelMeta(DeclarativeMeta):
         return dbmf_dict
 
     @staticmethod
-    def _duplicate_fields_value(dct: dict) -> dict:
-        fields = {
-            name: field
-            for (name, field) in dct.items()
-            if isinstance(field, FieldDefault)
-        }
-        return fields
-
-    @staticmethod
     def _generate_pydantic_model(dct: dict) -> type:
         """Generates a `pydantic` model based on class field types."""
         # The basis of the code is taken from
         # https://github.com/tiangolo/pydantic-sqlalchemy/blob/master/pydantic_sqlalchemy/main.py
 
+        columns = {
+            name: field
+            for (name, field) in dct.items()
+            if isinstance(field, FieldDefault)
+        }
+
         fields = dict()
-        for (name, field) in dct['__fields__'].items():
+        for (name, field) in columns.items():
             default = None
             if field.default is None and not field.nullable:
                 default = ...
@@ -128,7 +123,7 @@ class BaseModel(ModelWorker, metaclass=BaseModelMeta):
     __abstract__ = True
 
     def __init__(self, *args, **kwargs):
-        for (name, field_class) in self.__fields__.items():
+        for (name, field_class) in self.__table__.columns.items():
             if isinstance(field_class, FieldExecutableInterface):
                 if name in kwargs.keys():
                     kwargs[name] = field_class.execute(kwargs[name])
