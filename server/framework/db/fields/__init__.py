@@ -7,14 +7,18 @@ to allow customization and additional functionality to the standard
 """
 
 
-from .default import __all__ as __default_all__
-from .simple import __all__ as __simple_all__
-from .complex import __all__ as __complex_all__
+from .primitive import __all__ as __primitive_all__
+from .relations import __all__ as __relations_all__
+from .custom import __all__ as __custom_all__
+from .base import __all__ as __base_all__
+from .field_mixins import __all__ as __mixins_all__
 
-from .default import *
-from .simple import *
-from .complex import *
+from .primitive import *
+from .relations import *
+from .custom import *
+from .base import *
+from .field_mixins import *
 
 
-_all_ = __simple_all__ + __complex_all__
-__all__ = __default_all__ + _all_
+_all_ = __primitive_all__ + __relations_all__ + __custom_all__
+__all__ = _all_ + __base_all__ + __mixins_all__

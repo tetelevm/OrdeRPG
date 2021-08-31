@@ -1,32 +1,16 @@
-from sqlalchemy.sql.sqltypes import BigInteger, Float, String, DateTime
-
 from server.lib import generate_random_advanced_string
 from ...settings import settings
-from .default import FieldDefault, FieldExecutableInterface
+from .primitive import IntegerField, FloatField, StringField
+from .field_mixins import FieldExecutable, FieldMixinMinMax
 
 
 __all__ = [
-    'IntegerField',
     'IdField',
-    'FloatField',
+    'PositiveIntegerField',
     'CoefficientField',
-    'StringField',
     'PasswordField',
     'RandomStringField',
-    'DateTimeField',
 ]
-
-
-class IntegerField(FieldDefault):
-    """
-    Standard field of type Integer.
-
-    The field type is a BigInteger out of consideration that in today's
-    databases a few bytes do not play a particularly big role, but it
-    saves programmers from overflow problems that were unexpected at the
-    beginning of development.
-    """
-    column_type = BigInteger
 
 
 class IdField(IntegerField):
@@ -40,37 +24,17 @@ class IdField(IntegerField):
     }
 
 
-class FloatField(FieldDefault):
-    """Standard field of type Float."""
-    column_type = Float
+class PositiveIntegerField(IntegerField, FieldMixinMinMax):
+    min_value = 0
 
 
-class CoefficientField(FloatField, FieldExecutableInterface):
+class CoefficientField(FloatField, FieldMixinMinMax):
     """A field for storing Float type coefficients."""
 
     def __init__(self, min_value=0., max_value=1., *args, **kwargs):
         self.min_value = min_value
         self.max_value = max_value
         super().__init__(*args, **kwargs)
-
-    def execute(self, *args, **kwargs):
-        value = kwargs.get('value', 0)
-        return min(self.max_value, max(value, self.min_value))
-
-
-class StringField(FieldDefault):
-    """
-    Standard field with type String.
-
-    The default is unlimited length, otherwise the length must be
-    specified in `kwargs`.
-    """
-
-    column_type = String
-
-    def __init__(self, string_length=None, **kwargs):
-        self.column_type = self.column_type(length=string_length)
-        super().__init__(**kwargs)
 
 
 class PasswordField(StringField):
@@ -88,7 +52,7 @@ class PasswordField(StringField):
         return settings.password_hasher(password, salt, pepper)
 
 
-class RandomStringField(StringField, FieldExecutableInterface):
+class RandomStringField(StringField, FieldExecutable):
     """
     Standard string field, but with the ability to generate a random
     value.
@@ -109,8 +73,3 @@ class RandomStringField(StringField, FieldExecutableInterface):
         if length is None:
             raise ValueError('Length of random string is <None>!')
         return generate_random_advanced_string(length)
-
-
-class DateTimeField(FieldDefault):
-    """Standard field with DateTime type."""
-    column_type = DateTime

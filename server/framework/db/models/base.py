@@ -9,7 +9,7 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from server.lib import camel_to_snake
 from .default import DefaultInfo, DefaultBaseModelFunctionality
-from ..fields import FieldDefault, FieldExecutableInterface
+from ..fields import FieldDefault, FieldExecutable
 
 
 _all_ = ['BaseModel']
@@ -124,7 +124,7 @@ class BaseModel(ModelWorker, metaclass=BaseModelMeta):
 
     def __init__(self, *args, **kwargs):
         for (name, field_class) in self.__table__.columns.items():
-            if isinstance(field_class, FieldExecutableInterface):
+            if isinstance(field_class, FieldExecutable):
                 if name in kwargs.keys():
                     kwargs[name] = field_class.execute(kwargs[name])
                 elif not field_class.need_argument:

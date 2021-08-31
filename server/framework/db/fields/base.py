@@ -1,26 +1,16 @@
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC, ABCMeta
 
 from sqlalchemy.sql.schema import Column
 from sqlalchemy.sql.visitors import TraversibleType
 from sqlalchemy.sql.type_api import TypeEngine
 
 
-__all__ = [
-    'FieldDefaultMeta',
+_all_ = [
     'FieldDefault',
-    'FieldExecutableInterface',
 ]
-
-
-class FieldExecutableInterface(ABC):
-    """Interface for field class with execute."""
-
-    need_argument = True
-
-    @abstractmethod
-    def execute(self, *args, **kwargs):
-        """A method called on init model."""
-        pass
+__all__ = _all_ + [
+    'FieldDefaultMeta',
+]
 
 
 class FieldDefaultMeta(ABCMeta, TraversibleType):
@@ -53,7 +43,7 @@ class FieldDefaultMeta(ABCMeta, TraversibleType):
         return dct
 
 
-class FieldDefault(Column, metaclass=FieldDefaultMeta):
+class FieldDefault(ABC, Column, metaclass=FieldDefaultMeta):
     """
     Abstract field class from which all new types of fields are
     inherited.
