@@ -48,13 +48,13 @@ class BaseModelMeta(DeclarativeMeta):
         Info = type('Info', info_bases, {})
         dct['Info'] = Info
 
-        dct['__tablename__'] = mcs._generate_tablename(dct['Info'], clsname)
+        dct['__tablename__'] = mcs.generate_tablename(dct['Info'], clsname)
 
         dbmf_dict = mcs.get_default_model_dict()
-        dbmf_dict = mcs._drop_default_pk(dct['Info'], dbmf_dict)
+        dbmf_dict = mcs.drop_default_pk(dct['Info'], dbmf_dict)
         dct = dbmf_dict | dct
 
-        dct['__pydantic__'] = mcs._generate_pydantic_model(dct)
+        dct['__pydantic__'] = mcs.generate_pydantic_model(dct)
 
         return dct
 
@@ -73,22 +73,22 @@ class BaseModelMeta(DeclarativeMeta):
         return dbmf_dict
 
     @staticmethod
-    def _generate_tablename(info: type, clsname: str) -> str:
+    def generate_tablename(info: type, clsname: str) -> str:
         """
         Generates a table name in the database based on the class name.
         You can specify your own table name.
         Warning! Changes `tablename` attribute of `Info`.
 
         >>> class Info: tablename = None
-        >>> BaseModelMeta._generate_tablename(Info, 'YourSmthModel')
+        >>> BaseModelMeta.generate_tablename(Info, 'YourSmthModel')
         >>> # 'your_smth'
 
         >>> class Info: tablename = None
-        >>> BaseModelMeta._generate_tablename(Info, 'SmthWithNoModelLastWord')
+        >>> BaseModelMeta.generate_tablename(Info, 'SmthWithNoModelLastWord')
         >>> # 'smth_with_no_model_last_word
 
         >>> class Info: tablename = 'table'
-        >>> BaseModelMeta._generate_tablename(Info, 'YourSmthModel')
+        >>> BaseModelMeta.generate_tablename(Info, 'YourSmthModel')
         >>> # 'table'
         """
 
@@ -101,7 +101,7 @@ class BaseModelMeta(DeclarativeMeta):
         return tablename
 
     @staticmethod
-    def _drop_default_pk(info: type, dbmf_dict: dict) -> dict:
+    def drop_default_pk(info: type, dbmf_dict: dict) -> dict:
         """
         Removes the standard `id` field from the class if custom
         `primary_key` is used.
@@ -112,7 +112,7 @@ class BaseModelMeta(DeclarativeMeta):
         return dbmf_dict
 
     @staticmethod
-    def _generate_pydantic_model(dct: dict) -> type:
+    def generate_pydantic_model(dct: dict) -> type:
         """Generates a `pydantic` model based on class field types."""
         # The basis of the code is taken from
         # https://github.com/tiangolo/pydantic-sqlalchemy/blob/master/pydantic_sqlalchemy/main.py
