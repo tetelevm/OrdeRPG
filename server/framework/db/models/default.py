@@ -34,7 +34,3 @@ class DefaultBaseModelFunctionality:
     __pydantic__ = create_pydantic_model('__default_model')
 
     id = IdField(name='id')
-
-    class Info(DefaultInfo):
-        """Instance of standard Info."""
-        pass

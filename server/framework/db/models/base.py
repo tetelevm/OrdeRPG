@@ -26,6 +26,7 @@ class BaseModelMeta(DeclarativeMeta):
     """
     The main metaclass for generating database models.
 
+    - injects standard info data from `DefaultInfo`
     - injects standard data from `DefaultBaseModelFunctionality`
     - creates a `pydantic` model on `__pydantic__`
     - set `__tablename__
@@ -42,12 +43,15 @@ class BaseModelMeta(DeclarativeMeta):
         the new model class.
         """
 
-        dbmf_dict = BaseModelMeta.get_default_model_dict()
-        info = dct.get('Info', DefaultInfo)
+        info = dct.get('Info', None)
+        info_bases = ((info,) if info is not None else tuple()) + (DefaultInfo,)
+        Info = type('Info', info_bases, {})
+        dct['Info'] = Info
 
-        dct['__tablename__'] = mcs._generate_tablename(info, clsname)
+        dct['__tablename__'] = mcs._generate_tablename(dct['Info'], clsname)
 
-        dbmf_dict = mcs._drop_default_pk(info, dbmf_dict)
+        dbmf_dict = mcs.get_default_model_dict()
+        dbmf_dict = mcs._drop_default_pk(dct['Info'], dbmf_dict)
         dct = dbmf_dict | dct
 
         dct['__pydantic__'] = mcs._generate_pydantic_model(dct)
@@ -63,6 +67,8 @@ class BaseModelMeta(DeclarativeMeta):
 
         dbmf_dict = dict(DefaultBaseModelFunctionality.__dict__)
         dbmf_dict.pop('__dict__')
+        dbmf_dict.pop('__module__')
+        dbmf_dict.pop('__doc__')
         dbmf_dict.pop('__weakref__')
         return dbmf_dict
 
@@ -71,17 +77,27 @@ class BaseModelMeta(DeclarativeMeta):
         """
         Generates a table name in the database based on the class name.
         You can specify your own table name.
+        Warning! Changes `tablename` attribute of `Info`.
 
-        >>> BaseModelMeta._generate_tablename(..., 'YourSmthModel')
+        >>> class Info: tablename = None
+        >>> BaseModelMeta._generate_tablename(Info, 'YourSmthModel')
         >>> # 'your_smth'
-        >>> BaseModelMeta._generate_tablename(..., 'SmthWithNoModelLastWord')
-        >>> # 'smth_with_no_model_last_word'
+
+        >>> class Info: tablename = None
+        >>> BaseModelMeta._generate_tablename(Info, 'SmthWithNoModelLastWord')
+        >>> # 'smth_with_no_model_last_word
+
+        >>> class Info: tablename = 'table'
+        >>> BaseModelMeta._generate_tablename(Info, 'YourSmthModel')
+        >>> # 'table'
         """
 
         tablename = getattr(info, 'tablename', None)
         if not tablename:
             tablename = clsname.removesuffix('Model')
             tablename = camel_to_snake(tablename)
+            info.tablename = tablename
+
         return tablename
 
     @staticmethod
