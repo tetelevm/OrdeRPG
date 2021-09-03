@@ -12,6 +12,9 @@ from server.framework.db import (
     RandomStringField,
     PasswordField,
     CoefficientField,
+    BooleanField,
+    PositiveIntegerField,
+    ForeignKeyField,
 )
 
 __all__ = ['UserModel', 'PersonModel']
@@ -28,15 +31,17 @@ class UserModel(BaseModel):
     token = RandomStringField(128)
     created = DateTimeField(default=func.now())
     last_login = DateTimeField()
+    is_deleted = BooleanField()
 
 
 class PersonModel(BaseModel):
     """A user model containing business logic."""
 
     type = IntegerField()
-    user = None
+    user = ForeignKeyField(UserModel)
     level = IntegerField()
     experience = IntegerField()
     money = IntegerField()
     rating = IntegerField()
     kill_ratio = CoefficientField()
+    fights_count = PositiveIntegerField()
