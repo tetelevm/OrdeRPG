@@ -9,7 +9,7 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from server.lib import camel_to_snake
 from .default import DefaultInfo, DefaultBaseModelFunctionality
-from ..fields import FieldDefault, FieldExecutable
+from ..fields import FieldDefault, FieldExecutable, FieldRelationshipClass
 
 
 _all_ = ['BaseModel']
@@ -54,6 +54,7 @@ class BaseModelMeta(DeclarativeMeta):
         dbmf_dict = mcs.drop_default_pk(dct['Info'], dbmf_dict)
         dct = dbmf_dict | dct
 
+        dct = mcs.set_relation_fields(clsname, dct)
         dct['__pydantic__'] = mcs.generate_pydantic_model(dct)
 
         return dct
@@ -132,6 +133,27 @@ class BaseModelMeta(DeclarativeMeta):
             fields[name] = (field.type.python_type, default)
 
         return create_pydantic_model(dct['__tablename__'], **fields)
+
+    @staticmethod
+    def set_relation_fields(clsname: str, dct: dict) -> dict:
+        columns = {
+            name: field
+            for (name, field) in dct.items()
+            if isinstance(field, FieldRelationshipClass)
+        }
+
+        for (name, field) in columns.items():
+            generated_fields = field.generate_fields(clsname, dct['__tablename__'])
+
+            column_info = generated_fields[0]
+            rel_to_c_info = generated_fields[1]
+            rel_to_p_info = generated_fields[2]
+
+            dct[column_info[0]] = column_info[1]
+            dct[name] = rel_to_c_info[1]
+            setattr(field.model_to, rel_to_p_info[0], rel_to_p_info[1])
+
+        return dct
 
 
 class BaseModel(ModelWorker, metaclass=BaseModelMeta):

@@ -53,12 +53,18 @@ class FieldDefault(ABC, Column, metaclass=FieldDefaultMeta):
     """
 
     column_type = TypeEngine
+    parent_column = None
     _default_kwargs = dict()
 
     def __init__(self, **kwargs):
         kwargs = self._default_kwargs | kwargs
-        kwargs['type_'] = self.column_type
-        super().__init__(**kwargs)
+        kwargs.pop('type_', None)
+
+        args = [self.column_type]
+        if self.parent_column is not None:
+            args += [self.parent_column]
+
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         return super().__repr__().replace('Column', self.__class__.__name__)
