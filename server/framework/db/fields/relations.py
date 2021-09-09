@@ -41,20 +41,28 @@ class FieldRelationshipRelationship(RelationshipProperty, ABC):
         )
 
 
-GENERATED = Tuple[
-    Tuple[str, FieldRelationshipColumn],
-    Tuple[str, FieldRelationshipRelationship],
-    Tuple[str, FieldRelationshipRelationship],
-]
-
-
 class FieldRelationshipClass(ABC):
     model_to = None
     parent_name: str = None
     children_name: str = None
 
     @abstractmethod
-    def generate_fields(self, self_classname: str, self_tablename: str) -> GENERATED:
+    def generate_id_column(self) -> Tuple[str, FieldRelationshipColumn]:
+        pass
+
+    @abstractmethod
+    def generate_rel_for_c(
+            self,
+            c_tablename: str,
+    ) -> Tuple[str, FieldRelationshipRelationship]:
+        pass
+
+    @abstractmethod
+    def generate_rel_for_p(
+            self,
+            c_tablename: str,
+            c_classname: str,
+    ) -> Tuple[str, FieldRelationshipRelationship]:
         pass
 
     def __str__(self):
@@ -95,13 +103,6 @@ class ForeignKeyRelationship(FieldRelationshipRelationship):
         super().__init__(clsname, back_populates=backref)
 
 
-GENERATED_FK = Tuple[
-    Tuple[str, ForeignKeyColumn],
-    Tuple[str, ForeignKeyRelationship],
-    Tuple[str, ForeignKeyRelationship],
-]
-
-
 class ForeignKeyField(FieldRelationshipClass):
     def __init__(
             self,
@@ -113,7 +114,7 @@ class ForeignKeyField(FieldRelationshipClass):
         self.parent_name = parent_backref
         self.children_name = backref
 
-    def _generate_id(self) -> Tuple[str, ForeignKeyColumn]:
+    def generate_id_column(self) -> Tuple[str, ForeignKeyColumn]:
         parent_tablename = self.model_to.__tablename__
         column_field: FieldDefault = self.model_to.__table__.primary_key.columns[0]
 
@@ -125,9 +126,9 @@ class ForeignKeyField(FieldRelationshipClass):
             ForeignKeyColumn(column_field.column_type, fk_name)
         )
 
-    def _generate_rel_for_c(
+    def generate_rel_for_c(
             self,
-            c_tablename: str
+            c_tablename: str,
     ) -> Tuple[str, ForeignKeyRelationship]:
         parent_tablename = self.model_to.__tablename__
 
@@ -139,10 +140,10 @@ class ForeignKeyField(FieldRelationshipClass):
             ForeignKeyRelationship(parent_name, backref)
         )
 
-    def _generate_rel_for_p(
+    def generate_rel_for_p(
             self,
+            c_tablename: str,
             c_classname: str,
-            c_tablename: str
     ) -> Tuple[str, ForeignKeyRelationship]:
         parent_tablename = self.model_to.__tablename__
         parent_backref = self.parent_name or parent_tablename
@@ -151,10 +152,3 @@ class ForeignKeyField(FieldRelationshipClass):
                 c_tablename,
                 ForeignKeyRelationship(c_classname, parent_backref)
             )
-
-    def generate_fields(self, c_classname: str, c_tablename: str) -> GENERATED_FK:
-        column_id_info = self._generate_id()
-        rel_for_c_info = self._generate_rel_for_c(c_tablename)
-        rel_for_p_info = self._generate_rel_for_p(c_classname, c_tablename)
-
-        return column_id_info, rel_for_c_info, rel_for_p_info

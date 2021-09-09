@@ -35,7 +35,7 @@ class BaseModelMeta(DeclarativeMeta):
 
     def __new__(mcs, clsname: str, bases, dct):
         dct = mcs.generate_dict(dct, clsname)
-        return super(BaseModelMeta, mcs).__new__(mcs, clsname, bases, dct)
+        return super().__new__(mcs, clsname, bases, dct)
 
     @classmethod
     def generate_dict(mcs, dct: dict, clsname: str) -> dict:
@@ -144,18 +144,17 @@ class BaseModelMeta(DeclarativeMeta):
         }
 
         for (name, field) in columns.items():
-            generated_fields = field.generate_fields(clsname, dct['__tablename__'])
+            field: FieldRelationshipClass
 
-            column_id_info = generated_fields[0]
-            rel_for_c_info = generated_fields[1]
-            rel_for_p_info = generated_fields[2]
-
+            rel_for_c_info = field.generate_rel_for_c(dct['__tablename__'])
             dct[name] = rel_for_c_info[1]
 
+            column_id_info = field.generate_id_column()
             column = dct.setdefault(column_id_info[0], column_id_info[1])
             if column is not column_id_info[1]:
                 raise AlreadyExistsError(column_id_info[0], clsname, column)
 
+            rel_for_p_info = field.generate_rel_for_p(dct['__tablename__'], clsname)
             column = getattr(field.model_to, rel_for_p_info[0], rel_for_p_info[1])
             if column is not rel_for_p_info[1]:
                 raise AlreadyExistsError(
