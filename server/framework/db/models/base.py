@@ -23,9 +23,6 @@ class AlreadyExistsError(ExceptionFromFormattedDoc):
     """<{}> field of <{}> class is already occupied (current value is <{}>)"""
 
 
-ModelWorker = declarative_base(name='ModelGenerator')
-
-
 class BaseModelMeta(DeclarativeMeta):
     """
     The main metaclass for generating database models.
@@ -36,7 +33,7 @@ class BaseModelMeta(DeclarativeMeta):
     - set `__tablename__
     """
 
-    def __new__(mcs, clsname, bases, dct):
+    def __new__(mcs, clsname: str, bases, dct):
         dct = mcs.generate_dict(dct, clsname)
         return super(BaseModelMeta, mcs).__new__(mcs, clsname, bases, dct)
 
@@ -149,26 +146,29 @@ class BaseModelMeta(DeclarativeMeta):
         for (name, field) in columns.items():
             generated_fields = field.generate_fields(clsname, dct['__tablename__'])
 
-            column_info = generated_fields[0]
-            rel_to_c_info = generated_fields[1]
-            rel_to_p_info = generated_fields[2]
+            column_id_info = generated_fields[0]
+            rel_for_c_info = generated_fields[1]
+            rel_for_p_info = generated_fields[2]
 
-            dct[name] = rel_to_c_info[1]
+            dct[name] = rel_for_c_info[1]
 
-            column = dct.setdefault(column_info[0], column_info[1])
-            if column is not column_info[1]:
-                raise AlreadyExistsError(column_info[0], clsname, column)
+            column = dct.setdefault(column_id_info[0], column_id_info[1])
+            if column is not column_id_info[1]:
+                raise AlreadyExistsError(column_id_info[0], clsname, column)
 
-            column = getattr(field.model_to, rel_to_p_info[0], rel_to_p_info[1])
-            if column is not rel_to_p_info[1]:
+            column = getattr(field.model_to, rel_for_p_info[0], rel_for_p_info[1])
+            if column is not rel_for_p_info[1]:
                 raise AlreadyExistsError(
-                    column_info[0], field.model_to.__name__, column)
-            setattr(field.model_to, rel_to_p_info[0], rel_to_p_info[1])
+                    column_id_info[0], field.model_to.__name__, column)
+            setattr(field.model_to, rel_for_p_info[0], rel_for_p_info[1])
 
         return dct
 
 
-class BaseModel(ModelWorker, metaclass=BaseModelMeta):
+ModelWorker = declarative_base(name='ModelGenerator', metaclass=BaseModelMeta)
+
+
+class BaseModel(ModelWorker):
     """A class for inheritance, passes the creation to its metaclass."""
     __abstract__ = True
 
