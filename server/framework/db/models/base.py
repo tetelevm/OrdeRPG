@@ -7,7 +7,7 @@ from pydantic import create_model as create_pydantic_model
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 
-from server.lib import camel_to_snake
+from server.lib import ExceptionFromFormattedDoc, camel_to_snake
 from .default import DefaultInfo, DefaultBaseModelFunctionality
 from ..fields import FieldDefault, FieldExecutable, FieldRelationshipClass
 
@@ -17,6 +17,10 @@ __all__ = _all_ + [
     'BaseModelMeta',
     'ModelWorker',
 ]
+
+
+class AlreadyExistsError(ExceptionFromFormattedDoc):
+    """<{}> field of <{}> class is already occupied (current value is <{}>)"""
 
 
 ModelWorker = declarative_base(name='ModelGenerator')
@@ -149,8 +153,16 @@ class BaseModelMeta(DeclarativeMeta):
             rel_to_c_info = generated_fields[1]
             rel_to_p_info = generated_fields[2]
 
-            dct[column_info[0]] = column_info[1]
             dct[name] = rel_to_c_info[1]
+
+            column = dct.setdefault(column_info[0], column_info[1])
+            if column is not column_info[1]:
+                raise AlreadyExistsError(column_info[0], clsname, column)
+
+            column = getattr(field.model_to, rel_to_p_info[0], rel_to_p_info[1])
+            if column is not rel_to_p_info[1]:
+                raise AlreadyExistsError(
+                    column_info[0], field.model_to.__name__, column)
             setattr(field.model_to, rel_to_p_info[0], rel_to_p_info[1])
 
         return dct
