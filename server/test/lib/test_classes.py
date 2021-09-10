@@ -75,7 +75,6 @@ class ClassesTest(TestCase):
 
         # Test hash so long :(
         Hasher.set_algorithms(['blake2s', Shake(41), 'sha3_256'])
-        print(Hasher.hash('string', 'salt', 'pepper')[:64])
         self.assertEqual(
             Hasher.hash('string', 'salt', 'pepper')[:64],
             'c1caab078372d504f12703b252182dacfae760c6bad3bcefd64b639d3860a2cd'
