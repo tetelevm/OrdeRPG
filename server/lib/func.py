@@ -9,6 +9,7 @@ import os
 import sys
 import time
 import random
+import string
 
 
 _all_ = [
@@ -87,7 +88,7 @@ def with_randomize(funk):
 
 
 # 62 characters
-default_alphabet = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789'
+default_alphabet = string.ascii_letters + string.digits
 
 @with_randomize
 def generate_random_string(length: int, alphabet: Sequence = default_alphabet) -> str:
@@ -99,7 +100,7 @@ def generate_random_string(length: int, alphabet: Sequence = default_alphabet) -
 
 
 # 94 characters
-advanced_alphabet = default_alphabet + '`~!@#$%^&*()-_=+[{]};:\'"/?.>,<\\|'
+advanced_alphabet = default_alphabet + string.punctuation
 
 def generate_random_advanced_string(length: int) -> str:
     """
