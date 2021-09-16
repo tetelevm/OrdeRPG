@@ -12,6 +12,7 @@ settings = Settings()
 settings.password_hasher = Hasher.hash
 
 settings.database = {
+    'type': 'sqlite',
     'name': 'sqlite://'
 }
 

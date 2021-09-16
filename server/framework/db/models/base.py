@@ -7,6 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from server.lib import ExceptionFromFormattedDoc, camel_to_snake
+from ...settings import settings
 from ..fields import FieldExecutable, FieldRelationshipClass
 from .utils import generate_pydantic_model
 from .default import DefaultInfo, get_default_model_dict
@@ -33,9 +34,17 @@ class BaseModelMeta(DeclarativeMeta):
     - set `__tablename__
     """
 
+    def __init__(cls, clsname, bases, dct):
+        super().__init__(clsname, bases, dct)
+
+        if hasattr(cls, '__table__'):
+            if settings.database.get('type', None) == 'sqlite':
+                cls.set_sqlite_arguments(cls)
+
     def __new__(mcs, clsname, bases, dct):
         dct = mcs.generate_dict(dct, clsname)
-        return super().__new__(mcs, clsname, bases, dct)
+        cls = super().__new__(mcs, clsname, bases, dct)
+        return cls
 
     @classmethod
     def generate_dict(mcs, dct: dict, clsname: str) -> dict:
@@ -128,6 +137,11 @@ class BaseModelMeta(DeclarativeMeta):
             setattr(field.model_to, rel_for_p_info[0], rel_for_p_info[1])
 
         return dct
+
+    @staticmethod
+    def set_sqlite_arguments(cls):
+        sqlite_dict = {'autoincrement': True, 'with_rowid': True}
+        cls.__table__.dialect_options["sqlite"] = sqlite_dict
 
 
 ModelWorker = declarative_base(name='ModelWorker', metaclass=BaseModelMeta)

@@ -1,3 +1,5 @@
+from sqlalchemy.sql.sqltypes import INTEGER
+
 from server.lib import generate_random_advanced_string
 from ...settings import settings
 from .primitive import IntegerField, FloatField, StringField
@@ -15,6 +17,9 @@ __all__ = [
 
 class IdField(IntegerField):
     """IntegerField, with arguments for primary_key."""
+
+    if settings.database.get('type', None) == 'sqlite':
+        column_type = INTEGER
 
     _default_kwargs = {
         'autoincrement': True,
