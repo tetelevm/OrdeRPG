@@ -1,20 +1,28 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Tuple
 
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import RelationshipProperty
-from sqlalchemy.orm import relationship
 
 from .base import FieldDefault
 
 
-__all__ = [
+_all_ = [
     'FieldRelationshipColumn',
     'FieldRelationshipRelationship',
     'FieldRelationshipClass',
+
     'ForeignKeyColumn',
     'ForeignKeyRelationship',
+
+    'OnoToOneColumn',
+    'OnoToOneRelationship',
+]
+
+__all__ = _all_ + [
     'ForeignKeyField',
+    'OnoToOneField',
 ]
 
 
@@ -42,19 +50,24 @@ class FieldRelationshipRelationship(RelationshipProperty, ABC):
 
 
 class FieldRelationshipClass(ABC):
+    column_class = FieldRelationshipColumn
+    relation_class = FieldRelationshipRelationship
+
     model_to = None
     parent_name: str = None
     children_name: str = None
 
     @abstractmethod
-    def generate_id_column(self) -> Tuple[str, FieldRelationshipColumn]:
+    def generate_id_column(
+            self
+    ) -> Tuple[str, FieldRelationshipClass.column_class]:
         pass
 
     @abstractmethod
     def generate_rel_for_c(
             self,
             c_tablename: str,
-    ) -> Tuple[str, FieldRelationshipRelationship]:
+    ) -> Tuple[str, FieldRelationshipClass.relation_class]:
         pass
 
     @abstractmethod
@@ -62,7 +75,7 @@ class FieldRelationshipClass(ABC):
             self,
             c_tablename: str,
             c_classname: str,
-    ) -> Tuple[str, FieldRelationshipRelationship]:
+    ) -> Tuple[str, FieldRelationshipClass.relation_class]:
         pass
 
     def __str__(self):
@@ -104,6 +117,9 @@ class ForeignKeyRelationship(FieldRelationshipRelationship):
 
 
 class ForeignKeyField(FieldRelationshipClass):
+    column_class = ForeignKeyColumn
+    relation_class = ForeignKeyRelationship
+
     def __init__(
             self,
             model,
@@ -123,7 +139,7 @@ class ForeignKeyField(FieldRelationshipClass):
 
         return (
             fk_field_name,
-            ForeignKeyColumn(column_field.column_type, fk_name)
+            self.column_class(column_field.column_type, fk_name)
         )
 
     def generate_rel_for_c(
@@ -137,7 +153,7 @@ class ForeignKeyField(FieldRelationshipClass):
 
         return (
             parent_tablename,
-            ForeignKeyRelationship(parent_name, backref)
+            self.relation_class(parent_name, backref)
         )
 
     def generate_rel_for_p(
@@ -150,5 +166,43 @@ class ForeignKeyField(FieldRelationshipClass):
 
         return (
                 c_tablename,
-                ForeignKeyRelationship(c_classname, parent_backref)
+                self.relation_class(c_classname, parent_backref)
             )
+
+
+# ======== ONE TO ONE KEY ========
+
+
+class OnoToOneColumn(ForeignKeyColumn):
+    pass
+
+
+class OnoToOneRelationship(FieldRelationshipRelationship):
+    def __init__(self, clsname: str, backref: str):
+        super().__init__(clsname, back_populates=backref, uselist=False)
+
+
+class OnoToOneField(ForeignKeyField):
+    column_class = OnoToOneColumn
+    relation_class = OnoToOneRelationship
+
+    def generate_id_column(self) -> Tuple[str, OnoToOneColumn]:
+        return super().generate_id_column()
+
+    def generate_rel_for_c(
+            self,
+            c_tablename: str,
+    ) -> Tuple[str, OnoToOneRelationship]:
+        return super().generate_rel_for_c(c_tablename)
+
+    def generate_rel_for_p(
+            self,
+            c_tablename: str,
+            c_classname: str,
+    ) -> Tuple[str, OnoToOneRelationship]:
+        return super().generate_rel_for_p(c_tablename, c_classname)
+
+
+# ======== MANY TO MANY KEY ========
+
+

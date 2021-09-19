@@ -14,7 +14,7 @@ from server.framework.db import (
     CoefficientField,
     BooleanField,
     PositiveIntegerField,
-    ForeignKeyField,
+    OnoToOneField,
 )
 
 __all__ = ['UserModel', 'PersonModel']
@@ -38,7 +38,7 @@ class PersonModel(BaseModel):
     """A user model containing business logic."""
 
     type = IntegerField()
-    user = ForeignKeyField(UserModel)
+    user = OnoToOneField(UserModel)
     level = IntegerField()
     experience = IntegerField()
     money = IntegerField()
