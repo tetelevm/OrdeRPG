@@ -3,12 +3,15 @@ File with the model for inheritance in other database models. Also here is
 the metaclass that generates the models.
 """
 
+from typing import Callable
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from server.lib import ExceptionFromFormattedDoc, camel_to_snake
 from ...settings import settings
+from ..connection.session import db_session
 from ..fields import FieldExecutable, FieldRelationshipClass
+
 from .utils import generate_pydantic_model
 from .default import DefaultInfo, get_default_model_dict
 
@@ -161,3 +164,9 @@ class BaseModel(ModelWorker):
                     kwargs[name] = field_class.execute()
 
         super().__init__(*args, **kwargs)
+
+    def save(self):
+        for action_name in self.__presave_actions__:
+            action: Callable = getattr(self, action_name)
+            action()
+        db_session.add(self)

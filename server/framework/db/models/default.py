@@ -35,6 +35,7 @@ def get_default_model_dict() -> dict:
         """
 
         __pydantic__ = None
+        __presave_actions__ = []
         id = IdField(name='id')
 
     dbmf_dict = dict(DefaultBaseModelFunctionality.__dict__)
