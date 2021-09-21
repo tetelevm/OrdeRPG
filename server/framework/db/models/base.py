@@ -37,6 +37,8 @@ class BaseModelMeta(DeclarativeMeta):
     def __init__(cls, clsname, bases, dct):
         super().__init__(clsname, bases, dct)
 
+        dct['__pydantic__'] = generate_pydantic_model(dct)
+
         if hasattr(cls, '__table__'):
             if settings.database.get('type', None) == 'sqlite':
                 cls.set_sqlite_arguments(cls)
@@ -67,7 +69,6 @@ class BaseModelMeta(DeclarativeMeta):
             dct[key] = value
 
         dct = mcs.set_relation_fields(clsname, dct)
-        dct['__pydantic__'] = generate_pydantic_model(dct)
 
         return dct
 
