@@ -10,7 +10,8 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 from server.lib import ExceptionFromFormattedDoc, camel_to_snake
 from ...settings import settings
 from ..connection.session import db_session
-from ..fields import FieldExecutable, FieldRelationshipClass
+from ..fields import FieldExecutable, FieldRelationshipClass, IdField
+from .utils import generate_pydantic_model, attribute_presetter
 
 
 _all_ = [
@@ -74,10 +75,12 @@ class BaseModelMeta(DeclarativeMeta):
     """
     The main metaclass for generating database models.
 
+    - set `__tablename__
     - injects standard info data from `DefaultInfo`
     - injects standard data from `DefaultBaseModelFunctionality`
-    - creates a `pydantic` model on `__pydantic__`
-    - set `__tablename__
+    - set `__presetters__` for attributes
+    - creates a `__pydantic__` model
+    - translates `relationship fields` to `SQLAlchemy fields`
     """
 
     def __init__(cls, clsname, bases, dct):
@@ -115,6 +118,8 @@ class BaseModelMeta(DeclarativeMeta):
             dct[key] = value
 
         dct = mcs.set_relation_fields(clsname, dct)
+
+        dct['__presetters__'] = mcs.create_presetters_by_decorator(dct)
 
         return dct
 
@@ -190,6 +195,19 @@ class BaseModelMeta(DeclarativeMeta):
         sqlite_dict = {'autoincrement': True, 'with_rowid': True}
         cls.__table__.dialect_options["sqlite"] = sqlite_dict
 
+    @staticmethod
+    def create_presetters_by_decorator(dct: dict) -> dict:
+        presetters_list = [
+            (name, attr)
+            for (name, attr) in dct.items()
+            if attribute_presetter.is_presetter(attr)
+        ]
+        presetters = {
+            presetter.to_attr: dct.pop(attr_name)
+            for (attr_name, presetter) in presetters_list
+        }
+        return presetters
+
 
 ModelWorker = declarative_base(name='ModelWorker', metaclass=BaseModelMeta)
 
@@ -213,3 +231,8 @@ class BaseModel(ModelWorker):
             action: Callable = getattr(self, action_name)
             action()
         db_session.add(self)
+
+    def __setattr__(self, key, value):
+        if key in self.__presetters__:
+            value = self.__presetters__[key](self, value)
+        super().__setattr__(key, value)

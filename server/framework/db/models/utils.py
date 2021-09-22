@@ -1,5 +1,12 @@
+from types import FunctionType, LambdaType
 from pydantic import create_model as create_pydantic_model
 from ..fields import FieldDefault
+
+
+__all__ = [
+    'generate_pydantic_model',
+    'attribute_presetter',
+]
 
 
 def generate_pydantic_model(dct: dict, model_name: str = None) -> type:
@@ -23,3 +30,19 @@ def generate_pydantic_model(dct: dict, model_name: str = None) -> type:
 
         fields[name] = (field.type.python_type, default)
     return create_pydantic_model(model_name, **fields)
+
+
+def _is_attribute_presetter(attr):
+    is_func = isinstance(attr, (FunctionType, LambdaType))
+    has_link = hasattr(attr, 'to_attr')
+    return is_func and has_link
+
+
+def attribute_presetter(name):
+    def attribute_presetter_marker(func):
+        func.to_attr = name
+        return func
+    return attribute_presetter_marker
+
+
+attribute_presetter.is_presetter = _is_attribute_presetter

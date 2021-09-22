@@ -5,7 +5,10 @@ user's business data.
 
 from sqlalchemy import func
 from server.framework.db import (
+    attribute_presetter,
     BaseModel,
+)
+from server.framework.db.fields import (
     IntegerField,
     StringField,
     DateTimeField,
@@ -16,6 +19,8 @@ from server.framework.db import (
     PositiveIntegerField,
     OnoToOneField,
 )
+from server.settings import settings
+
 
 __all__ = ['UserModel', 'PersonModel']
 
@@ -26,12 +31,23 @@ class UserModel(BaseModel):
     """
 
     login = StringField(50, nullable=False)
-    pass_hash = PasswordField()
+    password = PasswordField(nullable=False)
     pepper = RandomStringField(48)
     token = RandomStringField(128)
     created = DateTimeField(default=func.now())
     last_login = DateTimeField()
     is_deleted = BooleanField(default=False, nullable=False)
+
+    def generate_password(self, password):
+        return UserModel.password.generate(
+            password,
+            self.pepper,
+            settings.hash_salt
+        )
+
+    @attribute_presetter('password')
+    def password_setter(self, value):
+        return self.generate_password(value)
 
 
 class PersonModel(BaseModel):
