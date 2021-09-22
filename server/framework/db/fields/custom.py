@@ -54,7 +54,7 @@ class PasswordField(StringField):
         Hashes the values passed to it using the hashing algorithm set
         in `settings` object.
         """
-        return settings.password_hasher(password, salt, pepper)
+        return settings.password_hasher(str(password), str(salt), str(pepper))
 
 
 class RandomStringField(StringField, FieldExecutable):
