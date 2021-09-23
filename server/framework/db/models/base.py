@@ -6,6 +6,7 @@ the metaclass that generates the models.
 from typing import Callable
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
+from sqlalchemy.sql.sqltypes import Integer
 
 from server.lib import ExceptionFromFormattedDoc, camel_to_snake
 from ...settings import settings
@@ -21,7 +22,6 @@ _all_ = [
 __all__ = _all_ + [
     'BaseModelMeta',
     'ModelWorker',
-    'get_default_model_dict',
 ]
 
 
@@ -35,36 +35,7 @@ class DefaultInfo:
     """
 
     tablename = None
-    custom_pk = False
-
-
-def get_default_model_dict() -> dict:
-    """
-    Translates `DefaultBaseModelFunctionality` class data into a
-    dictionary and converts the dictionary to the desired form.
-    """
-    class DefaultBaseModelFunctionality:
-        """
-        A class with standard model settings.
-
-        It could have been passed to `declarative_base`, but it was done
-        that way for more convenience in generating other models.
-        """
-
-        id = IdField(name='id')
-        __pydantic__ = None
-        __presave_actions__ = list()
-        __presetters__ = dict()
-
-    dbmf_dict = dict(DefaultBaseModelFunctionality.__dict__)
-    to_pop = ['__dict__', '__doc__', '__module__', '__weakref__']
-    for key in to_pop:
-        dbmf_dict.pop(key)
-
-    dbmf_dict['__pydantic__'] = generate_pydantic_model(
-        dbmf_dict, model_name='__default_model')
-
-    return dbmf_dict
+    default_pk = True
 
 
 class AlreadyExistsError(ExceptionFromFormattedDoc):
@@ -85,20 +56,14 @@ class BaseModelMeta(DeclarativeMeta):
 
     def __init__(cls, clsname, bases, dct):
         super().__init__(clsname, bases, dct)
-
-        cls.__pydantic__ = generate_pydantic_model(dct)
-
-        if hasattr(cls, '__table__'):
-            if settings.database.get('type', None) == 'sqlite':
-                cls.set_sqlite_arguments(cls)
+        cls.postinit_functionality(cls, dct)
 
     def __new__(mcs, clsname, bases, dct):
-        dct = mcs.generate_dict(dct, clsname)
-        cls = super().__new__(mcs, clsname, bases, dct)
-        return cls
+        dct = mcs.precreate_functionality(dct, clsname)
+        return super().__new__(mcs, clsname, bases, dct)
 
     @classmethod
-    def generate_dict(mcs, dct: dict, clsname: str) -> dict:
+    def precreate_functionality(mcs, dct: dict, clsname: str) -> dict:
         """
         The main method of the class. Executes all necessary logic on
         the new model class.
@@ -110,18 +75,21 @@ class BaseModelMeta(DeclarativeMeta):
         dct['Info'] = Info
 
         dct['__tablename__'] = mcs.generate_tablename(dct['Info'], clsname)
-
-        dbmf_dict = get_default_model_dict()
-        dbmf_dict = mcs.drop_default_pk(dct['Info'], dbmf_dict)
-        new_dct = dbmf_dict | dct
-        for (key, value) in new_dct.items():
-            dct[key] = value
+        mcs.create_default_pk(dct)
 
         dct = mcs.set_relation_fields(clsname, dct)
 
         dct['__presetters__'] = mcs.create_presetters_by_decorator(dct)
 
         return dct
+
+    @classmethod
+    def postinit_functionality(mcs, cls, dct: dict) -> None:
+        cls.__pydantic__ = generate_pydantic_model(dct)
+
+        if hasattr(cls, '__table__'):
+            if settings.database.get('type', None) == 'sqlite':
+                cls.set_sqlite_arguments(cls)
 
     @staticmethod
     def generate_tablename(info: type, clsname: str) -> str:
@@ -152,15 +120,16 @@ class BaseModelMeta(DeclarativeMeta):
         return tablename
 
     @staticmethod
-    def drop_default_pk(info: type, dbmf_dict: dict) -> dict:
+    def create_default_pk(dct: dict) -> None:
         """
-        Removes the standard `id` field from the class if custom
-        `primary_key` is used.
+        Creates a standard `id` field as `IdField(name='id')` if
+        `default_pk` is used.
         """
 
-        if getattr(info, 'custom_pk', False):
-            dbmf_dict.pop('id', None)
-        return dbmf_dict
+        if dct['Info'].default_pk:
+            dct['id'] = IdField(name='id')
+        if  dct.get('__abstract__', False):
+            dct.pop('id', None)
 
     @staticmethod
     def set_relation_fields(clsname: str, dct: dict) -> dict:
@@ -192,8 +161,11 @@ class BaseModelMeta(DeclarativeMeta):
 
     @staticmethod
     def set_sqlite_arguments(cls):
-        sqlite_dict = {'autoincrement': True, 'with_rowid': True}
-        cls.__table__.dialect_options["sqlite"] = sqlite_dict
+        pk_col = cls.__table__.primary_key.columns[0].type
+        is_int_pk = isinstance(pk_col, Integer)
+        if is_int_pk:
+            sqlite_dict = {'autoincrement': True, 'with_rowid': True}
+            cls.__table__.dialect_options["sqlite"] = sqlite_dict
 
     @staticmethod
     def create_presetters_by_decorator(dct: dict) -> dict:
@@ -215,6 +187,12 @@ ModelWorker = declarative_base(name='ModelWorker', metaclass=BaseModelMeta)
 class BaseModel(ModelWorker):
     """A class for inheritance, passes the creation to its metaclass."""
     __abstract__ = True
+
+    __pydantic__ = None
+    __presave_actions__ = list()
+    __presetters__ = dict()
+
+    id = None  # After creation it will have value of `IdField(name='id')`
 
     def __init__(self, *args, **kwargs):
         for (name, field_class) in self.__table__.columns.items():
