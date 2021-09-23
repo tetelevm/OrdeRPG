@@ -31,12 +31,17 @@ class UserModel(BaseModel):
     """
 
     login = StringField(50, nullable=False)
+    name = StringField(50, nullable=False)
     password = PasswordField(nullable=False)
     pepper = RandomStringField(48)
     token = RandomStringField(128)
     created = DateTimeField(default=func.now())
     last_login = DateTimeField()
     is_deleted = BooleanField(default=False, nullable=False)
+
+    @attribute_presetter('password')
+    def password_setter(self, value):
+        return self.generate_password(value)
 
     def generate_password(self, password):
         return UserModel.password.generate(
@@ -45,16 +50,15 @@ class UserModel(BaseModel):
             settings.hash_salt
         )
 
-    @attribute_presetter('password')
-    def password_setter(self, value):
-        return self.generate_password(value)
+    def check_auth(self):
+        pass
 
 
 class PersonModel(BaseModel):
     """A user model containing business logic."""
 
-    type = IntegerField(nullable=False)
     user = OnoToOneField(UserModel)
+    type = IntegerField(nullable=False)
     level = IntegerField(default=1, nullable=False)
     experience = IntegerField(default=0, nullable=False)
     money = IntegerField(default=0, nullable=False)
