@@ -128,7 +128,7 @@ class BaseModelMeta(DeclarativeMeta):
 
         if dct['Info'].default_pk:
             dct['id'] = IdField(name='id')
-        if  dct.get('__abstract__', False):
+        if dct.get('__abstract__', False):
             dct.pop('id', None)
 
     @staticmethod
@@ -150,7 +150,11 @@ class BaseModelMeta(DeclarativeMeta):
             if column is not column_id_info[1]:
                 raise AlreadyExistsError(column_id_info[0], clsname, column)
 
-            rel_for_p_info = field.generate_rel_for_p(dct['__tablename__'], clsname)
+            rel_for_p_info = field.generate_rel_for_p(
+                dct['__tablename__'],
+                clsname,
+                name
+            )
             column = getattr(field.model_to, rel_for_p_info[0], rel_for_p_info[1])
             if column is not rel_for_p_info[1]:
                 raise AlreadyExistsError(

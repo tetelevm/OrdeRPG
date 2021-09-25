@@ -16,7 +16,7 @@ class ItemTypeModel(BaseModel):
 
 
 class ItemModel(BaseModel):
-    item_type = ForeignKeyField(ItemTypeModel)  # TODO: different names
+    type = ForeignKeyField(ItemTypeModel)
     name = StringField(40, nullable=False)
     description = StringField()
     characteristics = None  # waiting for M2M field
