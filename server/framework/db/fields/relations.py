@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import RelationshipProperty
 
+from server.lib import ExceptionFromFormattedDoc
 from .base import FieldDefault
 
 
@@ -22,6 +23,10 @@ __all__ = _all_ + [
     'ForeignKeyField',
     'OnoToOneField',
 ]
+
+
+class AlreadyExistsError(ExceptionFromFormattedDoc):
+    """<{}> field of <{}> class is already occupied (current value is <{}>)"""
 
 
 # ======== INTERFACES ========
@@ -55,28 +60,6 @@ class FieldRelationshipClass(ABC):
     parent_name: str = None
     children_name: str = None
 
-    @abstractmethod
-    def generate_id_column(
-            self
-    ) -> tuple[str, FieldRelationshipClass.column_class]:
-        pass
-
-    @abstractmethod
-    def generate_rel_for_c(
-            self,
-            c_tablename: str,
-    ) -> tuple[str, FieldRelationshipClass.relation_class]:
-        pass
-
-    @abstractmethod
-    def generate_rel_for_p(
-            self,
-            c_tablename: str,
-            c_classname: str,
-            on_c_name: str,
-    ) -> tuple[str, FieldRelationshipClass.relation_class]:
-        pass
-
     def __str__(self):
         to_name = (
             self.model_to.__name__
@@ -98,6 +81,15 @@ class FieldRelationshipClass(ABC):
             r_type=self.__class__.__name__,
             model_to=to_name,
         )
+
+    @abstractmethod
+    def generate_fields(
+            self,
+            clsname: str,
+            field_name: str,
+            dct: dict,
+    ) -> None:
+        pass
 
 
 # ======== FOREIGN KEY ========
@@ -141,32 +133,6 @@ class ForeignKeyField(FieldRelationshipClass):
         self.self_kwargs = self_kwargs
         self.parent_kwargs = parent_kwargs
 
-    def generate_id_column(self):
-        parent_tablename = self.model_to.__tablename__
-        column_field: FieldDefault = self.model_to.__table__.primary_key.columns[0]
-
-        fk_name = f'{parent_tablename}.{column_field.name}'
-        fk_field_name = f'{parent_tablename}_{column_field.name}'
-        column = self.column_class(
-            column_field.column_type,
-            fk_name,
-            **self.column_kwargs
-        )
-        return fk_field_name, column
-
-    def generate_rel_for_c(self, c_tablename: str):
-        parent_tablename = self.model_to.__tablename__
-
-        parent_name = self.model_to.__name__
-        self_from_parent_name = self.children_name or c_tablename
-        for_self_rel = self.relation_class(
-            parent_name,
-            self_from_parent_name,
-            **self.self_kwargs
-        )
-
-        return parent_tablename, for_self_rel
-
     def generate_rel_for_p(
             self,
             c_tablename: str,
@@ -180,6 +146,38 @@ class ForeignKeyField(FieldRelationshipClass):
         )
 
         return c_tablename, for_parent_rel
+
+    def generate_fields(
+            self,
+            clsname: str,
+            field_name: str,
+            dct: dict,
+    ) -> None:
+        self_tablename = dct['__tablename__']
+        parent_tablename = self.model_to.__tablename__
+        parent_pk_field: FieldDefault = self.model_to.__table__.primary_key.columns[0]
+        parent_clsname = self.model_to.__name__
+        parent_fieldname = self.children_name or self_tablename
+
+        # set database column
+        fk_column_code = f'{parent_tablename}.{parent_pk_field.name}'
+        fk_field_name = f'{parent_tablename}_{parent_pk_field.name}'
+        fk_type = parent_pk_field.column_type
+        column = self.column_class(fk_type, fk_column_code, **self.column_kwargs)
+        column = dct.setdefault(fk_field_name, column)
+        if column is not column:
+            raise AlreadyExistsError(fk_field_name, clsname, column)
+
+        # set parent relationship
+        parent_relation = self.relation_class(clsname, field_name,  **self.parent_kwargs)
+        parent_attr = getattr(self.model_to, parent_fieldname, parent_relation)
+        if parent_attr is not parent_relation:
+            raise AlreadyExistsError(parent_fieldname, parent_clsname, parent_attr)
+        setattr(self.model_to, parent_fieldname, parent_relation)
+
+        # set self relationship
+        self_relation = self.relation_class(parent_clsname, parent_fieldname,**self.self_kwargs)
+        dct[field_name] = self_relation
 
 
 # ======== ONE TO ONE KEY ========

@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.sqltypes import Integer
 
-from server.lib import ExceptionFromFormattedDoc, camel_to_snake
+from server.lib import camel_to_snake
 from ...settings import settings
 from ..connection.session import db_session
 from ..fields import FieldExecutable, FieldRelationshipClass, IdField
@@ -36,10 +36,6 @@ class DefaultInfo:
 
     tablename = None
     default_pk = True
-
-
-class AlreadyExistsError(ExceptionFromFormattedDoc):
-    """<{}> field of <{}> class is already occupied (current value is <{}>)"""
 
 
 class BaseModelMeta(DeclarativeMeta):
@@ -133,34 +129,15 @@ class BaseModelMeta(DeclarativeMeta):
 
     @staticmethod
     def set_relation_fields(clsname: str, dct: dict) -> dict:
-        columns = {
-            name: field
+        columns = tuple(
+            (name, field)
             for (name, field) in dct.items()
             if isinstance(field, FieldRelationshipClass)
-        }
+        )
 
-        for (name, field) in columns.items():
+        for (name, field) in columns:
             field: FieldRelationshipClass
-
-            rel_for_c_info = field.generate_rel_for_c(dct['__tablename__'])
-            dct[name] = rel_for_c_info[1]
-
-            column_id_info = field.generate_id_column()
-            column = dct.setdefault(column_id_info[0], column_id_info[1])
-            if column is not column_id_info[1]:
-                raise AlreadyExistsError(column_id_info[0], clsname, column)
-
-            rel_for_p_info = field.generate_rel_for_p(
-                dct['__tablename__'],
-                clsname,
-                name
-            )
-            column = getattr(field.model_to, rel_for_p_info[0], rel_for_p_info[1])
-            if column is not rel_for_p_info[1]:
-                raise AlreadyExistsError(
-                    column_id_info[0], field.model_to.__name__, column)
-            setattr(field.model_to, rel_for_p_info[0], rel_for_p_info[1])
-
+            field.generate_fields(clsname, name, dct)
         return dct
 
     @staticmethod
@@ -196,7 +173,7 @@ class BaseModel(ModelWorker):
     __presave_actions__ = list()
     __presetters__ = dict()
 
-    id = None  # After creation it will have value of `IdField(name='id')`
+    id = IdField(name='id')  # After creation it will delete
 
     def __init__(self, *args, **kwargs):
         for (name, field_class) in self.__table__.columns.items():
