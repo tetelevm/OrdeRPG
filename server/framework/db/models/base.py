@@ -213,6 +213,7 @@ class BaseModel(ModelWorker):
             action: Callable = getattr(self, action_name)
             action()
         db_session.add(self)
+        db_session.commit()
 
     def __setattr__(self, key, value):
         if key in self.__presetters__:
