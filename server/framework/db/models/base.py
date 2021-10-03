@@ -51,6 +51,7 @@ class BaseModelMeta(DeclarativeMeta):
     - injects standard info data from `DefaultInfo`
     - injects standard data from `DefaultBaseModelFunctionality`
     - set `__presetters__` for attributes
+    - drop `droppable_attribute`s
     - creates a `__pydantic__` model
     - translates `relationship fields` to `SQLAlchemy fields`
     """
@@ -60,33 +61,25 @@ class BaseModelMeta(DeclarativeMeta):
         cls.postinit_functionality(cls, dct)
 
     def __new__(mcs, clsname, bases, dct):
-        dct = mcs.precreate_functionality(dct, clsname)
+        mcs.precreate_functionality(dct, clsname)
         return super().__new__(mcs, clsname, bases, dct)
 
     @classmethod
-    def precreate_functionality(mcs, dct: dict, clsname: str) -> dict:
+    def precreate_functionality(mcs, dct: dict, clsname: str):
         """
         The main method of the class. Executes all necessary logic on
         the new model class.
         """
 
-        info = dct.get('Info', None)
-        info_bases = ((info,) if info is not None else tuple()) + (DefaultInfo,)
-        Info = type('Info', info_bases, {})
-        dct['Info'] = Info
-
-        dct['__tablename__'] = mcs.generate_tablename(dct['Info'], clsname)
+        mcs.add_info(dct)
+        mcs.generate_tablename(dct, clsname)
         mcs.create_default_pk(dct)
-
-        dct = mcs.set_relation_fields(clsname, dct)
-
-        dct['__presetters__'] = mcs.create_presetters_by_decorator(dct)
+        mcs.set_relation_fields(clsname, dct)
+        mcs.create_presetters_by_decorator(dct)
         mcs.drop_droppable_by_decorator(dct)
 
-        return dct
-
     @classmethod
-    def postinit_functionality(mcs, cls, dct: dict) -> None:
+    def postinit_functionality(mcs, cls, dct: dict):
         cls.__pydantic__ = generate_pydantic_model(dct)
 
         if hasattr(cls, '__table__'):
@@ -94,35 +87,34 @@ class BaseModelMeta(DeclarativeMeta):
                 cls.set_sqlite_arguments(cls)
 
     @staticmethod
-    def generate_tablename(info: type, clsname: str) -> str:
+    def add_info(dct):
+        info = dct.get('Info', None)
+        info_bases = ((info,) if info is not None else tuple()) + (DefaultInfo,)
+        Info = type('Info', info_bases, {})
+        dct['Info'] = Info
+
+    @staticmethod
+    def generate_tablename(dct: dict, clsname: str):
         """
         Generates a table name in the database based on the class name.
         You can specify your own table name.
         Warning! Changes `tablename` attribute of `Info`.
-
-        >>> class Info: tablename = None
-        >>> BaseModelMeta.generate_tablename(Info, 'YourSmthModel')
-        >>> # 'your_smth'
-
-        >>> class Info: tablename = None
-        >>> BaseModelMeta.generate_tablename(Info, 'SmthWithNoModelLastWord')
-        >>> # 'smth_with_no_model_last_word
-
-        >>> class Info: tablename = 'table'
-        >>> BaseModelMeta.generate_tablename(Info, 'YourSmthModel')
-        >>> # 'table'
         """
-
+        info = dct['Info']
         tablename = getattr(info, 'tablename', None)
+
+        if not tablename:
+            tablename = dct.pop('__tablename__', None)
+
         if not tablename:
             tablename = clsname.removesuffix('Model')
             tablename = camel_to_snake(tablename)
-            info.tablename = tablename
 
-        return tablename
+        dct['__tablename__'] = tablename
+        info.tablename = tablename
 
     @staticmethod
-    def create_default_pk(dct: dict) -> None:
+    def create_default_pk(dct: dict):
         """
         Creates a standard `id` field as `IdField(name='id')` if
         `default_pk` is used.
@@ -134,7 +126,7 @@ class BaseModelMeta(DeclarativeMeta):
             dct.pop('id', None)
 
     @staticmethod
-    def set_relation_fields(clsname: str, dct: dict) -> dict:
+    def set_relation_fields(clsname: str, dct: dict):
         columns = tuple(
             (name, field)
             for (name, field) in dct.items()
@@ -144,7 +136,6 @@ class BaseModelMeta(DeclarativeMeta):
         for (name, field) in columns:
             field: FieldRelationshipClass
             field.generate_fields(clsname, name, dct)
-        return dct
 
     @staticmethod
     def set_sqlite_arguments(cls):
@@ -155,16 +146,17 @@ class BaseModelMeta(DeclarativeMeta):
             cls.__table__.dialect_options["sqlite"] = sqlite_dict
 
     @staticmethod
-    def create_presetters_by_decorator(dct: dict[str, Any]) -> dict:
+    def create_presetters_by_decorator(dct: dict[str, Any]):
         presetters = dict()
         for field_name in list(dct.keys()):
             if type(dct[field_name]) == attribute_presetter:
                 presetter: attribute_presetter = dct.pop(field_name)
                 presetters[presetter.to_attr] = presetter.call
-        return presetters
+
+        dct['__presetters__'] = presetters
 
     @staticmethod
-    def drop_droppable_by_decorator(dct: dict[str, Any]) -> None:
+    def drop_droppable_by_decorator(dct: dict[str, Any]):
         for field_name in list(dct.keys()):
             if type(dct[field_name]) == droppable_attribute:
                 dct.pop(field_name)
