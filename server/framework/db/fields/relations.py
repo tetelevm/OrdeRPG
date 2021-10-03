@@ -3,9 +3,10 @@ from abc import ABC, abstractmethod
 
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import RelationshipProperty
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from server.lib import ExceptionFromFormattedDoc
-from ..models.utils import get_model_primary_key
+from ..models.utils import get_model_primary_key, PostInitCreator
 from .base import FieldDefault
 
 
@@ -34,7 +35,11 @@ class AlreadyExistsError(ExceptionFromFormattedDoc):
 
 
 class FieldRelationshipColumn(FieldDefault, ABC):
-    pass
+    def __init__(self, column_type, fk_name, **kwargs):
+        self.column_type = column_type
+        self.parent_column = ForeignKey(fk_name)
+        kwargs.setdefault('nullable', False)
+        super().__init__(**kwargs)
 
 
 class FieldRelationshipRelationship(RelationshipProperty, ABC):
@@ -94,11 +99,7 @@ class FieldRelationshipClass(ABC):
 
 
 class ForeignKeyColumn(FieldRelationshipColumn):
-    def __init__(self, column_type, fk_name, **kwargs):
-        self.column_type = column_type
-        self.parent_column = ForeignKey(fk_name)
-        kwargs.setdefault('nullable', False)
-        super().__init__(**kwargs)
+    pass
 
 
 class ForeignKeyRelationship(FieldRelationshipRelationship):
@@ -131,13 +132,13 @@ class ForeignKeyField(FieldRelationshipClass):
         self.self_kwargs = self_kwargs
         self.parent_kwargs = parent_kwargs
 
-    def generate_fields(
+    def postinit_create_field(
             self,
+            model_from: DeclarativeMeta,
             clsname: str,
             field_name: str,
-            dct: dict,
-    ) -> None:
-        self_tablename = dct['__tablename__']
+    ):
+        self_tablename = model_from.__tablename__
         parent_tablename = self.model_to.__tablename__
         parent_pk_field: FieldDefault = get_model_primary_key(self.model_to)
         parent_clsname = self.model_to.__name__
@@ -148,9 +149,10 @@ class ForeignKeyField(FieldRelationshipClass):
         fk_field_name = f'{parent_tablename}_{parent_pk_field.name}'
         fk_type = parent_pk_field.column_type
         column = self.column_class(fk_type, fk_column_code, **self.column_kwargs)
-        column = dct.setdefault(fk_field_name, column)
-        if column is not column:
+        column_attr = getattr(model_from, fk_field_name, column)
+        if column is not column_attr:
             raise AlreadyExistsError(fk_field_name, clsname, column)
+        setattr(model_from, fk_field_name, column)
 
         # set parent relationship
         parent_relation = self.relation_class(clsname, field_name, **self.parent_kwargs)
@@ -161,7 +163,16 @@ class ForeignKeyField(FieldRelationshipClass):
 
         # set self relationship
         self_relation = self.relation_class(parent_clsname, parent_fieldname, **self.self_kwargs)
-        dct[field_name] = self_relation
+        setattr(model_from, field_name, self_relation)
+
+    def generate_fields(
+            self,
+            clsname: str,
+            field_name: str,
+            dct: dict,
+    ) -> None:
+        action = PostInitCreator(self.postinit_create_field, clsname, field_name)
+        dct['_postinit_actions'].append(action)
 
 
 # ======== ONE TO ONE KEY ========

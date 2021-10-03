@@ -54,6 +54,7 @@ class BaseModelMeta(DeclarativeMeta):
     - drop `droppable_attribute`s
     - creates a `__pydantic__` model
     - translates `relationship fields` to `SQLAlchemy fields`
+    - executes `_postinit_actions`
     """
 
     def __init__(cls, clsname, bases, dct):
@@ -71,6 +72,7 @@ class BaseModelMeta(DeclarativeMeta):
         the new model class.
         """
 
+        dct.setdefault('_postinit_actions', [])
         mcs.add_info(dct)
         mcs.generate_tablename(dct, clsname)
         mcs.create_default_pk(dct)
@@ -85,6 +87,11 @@ class BaseModelMeta(DeclarativeMeta):
         if hasattr(cls, '__table__'):
             if settings.database.get('type', None) == 'sqlite':
                 cls.set_sqlite_arguments(cls)
+
+        for action in cls._postinit_actions:
+            action: Callable
+            action(cls)
+        del cls._postinit_actions
 
     @staticmethod
     def add_info(dct):
@@ -168,6 +175,7 @@ ModelWorker = declarative_base(name='ModelWorker', metaclass=BaseModelMeta)
 class BaseModel(ModelWorker):
     """A class for inheritance, passes the creation to its metaclass."""
     __abstract__ = True
+    _postinit_actions = []  #
 
     __pydantic__ = None
     __presave_actions__ = list()

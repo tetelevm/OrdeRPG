@@ -8,6 +8,7 @@ __all__ = [
     'attribute_presetter',
     'get_model_primary_key',
     'droppable_attribute',
+    'PostInitCreator',
 ]
 
 
@@ -57,3 +58,13 @@ class droppable_attribute:
 
 def get_model_primary_key(model):
     return model.__table__.primary_key.columns[0]
+
+
+class PostInitCreator:
+    def __init__(self, call, *args, **kwargs):
+        self.call = call
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self, model_cls):
+        self.call(model_cls, *self.args, **self.kwargs)
