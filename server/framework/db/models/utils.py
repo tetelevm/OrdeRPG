@@ -1,11 +1,13 @@
-from types import FunctionType, LambdaType
+from types import FunctionType
 from pydantic import create_model as create_pydantic_model
-from ..fields import FieldDefault
+from ..fields.base import FieldDefault
 
 
 __all__ = [
     'generate_pydantic_model',
     'attribute_presetter',
+    'get_model_primary_key',
+    'droppable_attribute',
 ]
 
 
@@ -16,14 +18,14 @@ def generate_pydantic_model(dct: dict, model_name: str = None) -> type:
 
     model_name = model_name or dct['__tablename__']
 
-    columns = {
-        name: field
+    columns = (
+        (name, field)
         for (name, field) in dct.items()
         if isinstance(field, FieldDefault)
-    }
+    )
 
     fields = dict()
-    for (name, field) in columns.items():
+    for (name, field) in columns:
         default = None
         if field.default is None and not field.nullable:
             default = ...
@@ -32,17 +34,26 @@ def generate_pydantic_model(dct: dict, model_name: str = None) -> type:
     return create_pydantic_model(model_name, **fields)
 
 
-def _is_attribute_presetter(attr):
-    is_func = isinstance(attr, (FunctionType, LambdaType))
-    has_link = hasattr(attr, 'to_attr')
-    return is_func and has_link
+class attribute_presetter:
+    to_attr: str = None
+    call: FunctionType = None
+
+    def __new__(cls, name: str, link: FunctionType = None):
+        self = super().__new__(cls)
+        self.to_attr = name
+        if link is not None:
+            self = self(link)
+        return self
+
+    def __call__(self, func: FunctionType):
+        self.call = func
+        return self
 
 
-def attribute_presetter(name):
-    def attribute_presetter_marker(func):
-        func.to_attr = name
-        return func
-    return attribute_presetter_marker
+class droppable_attribute:
+    def __init__(self, attr):
+        self.value = attr
 
 
-attribute_presetter.is_presetter = _is_attribute_presetter
+def get_model_primary_key(model):
+    return model.__table__.primary_key.columns[0]

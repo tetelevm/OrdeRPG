@@ -3,7 +3,7 @@ File with the model for inheritance in other database models. Also here is
 the metaclass that generates the models.
 """
 
-from typing import Callable
+from typing import Callable, Any
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.sqltypes import Integer
@@ -12,7 +12,12 @@ from server.lib import camel_to_snake
 from ...settings import settings
 from ..connection.session import db_session
 from ..fields import FieldExecutable, FieldRelationshipClass, IdField
-from .utils import generate_pydantic_model, attribute_presetter
+from .utils import (
+    generate_pydantic_model,
+    attribute_presetter,
+    droppable_attribute,
+    get_model_primary_key,
+)
 
 
 _all_ = [
@@ -76,6 +81,7 @@ class BaseModelMeta(DeclarativeMeta):
         dct = mcs.set_relation_fields(clsname, dct)
 
         dct['__presetters__'] = mcs.create_presetters_by_decorator(dct)
+        mcs.drop_droppable_by_decorator(dct)
 
         return dct
 
@@ -142,24 +148,26 @@ class BaseModelMeta(DeclarativeMeta):
 
     @staticmethod
     def set_sqlite_arguments(cls):
-        pk_col = cls.__table__.primary_key.columns[0].type
+        pk_col = get_model_primary_key(cls).type
         is_int_pk = isinstance(pk_col, Integer)
         if is_int_pk:
             sqlite_dict = {'autoincrement': True, 'with_rowid': True}
             cls.__table__.dialect_options["sqlite"] = sqlite_dict
 
     @staticmethod
-    def create_presetters_by_decorator(dct: dict) -> dict:
-        presetters_list = [
-            (name, attr)
-            for (name, attr) in dct.items()
-            if attribute_presetter.is_presetter(attr)
-        ]
-        presetters = {
-            presetter.to_attr: dct.pop(attr_name)
-            for (attr_name, presetter) in presetters_list
-        }
+    def create_presetters_by_decorator(dct: dict[str, Any]) -> dict:
+        presetters = dict()
+        for field_name in list(dct.keys()):
+            if type(dct[field_name]) == attribute_presetter:
+                presetter: attribute_presetter = dct.pop(field_name)
+                presetters[presetter.to_attr] = presetter.call
         return presetters
+
+    @staticmethod
+    def drop_droppable_by_decorator(dct: dict[str, Any]) -> None:
+        for field_name in list(dct.keys()):
+            if type(dct[field_name]) == droppable_attribute:
+                dct.pop(field_name)
 
 
 ModelWorker = declarative_base(name='ModelWorker', metaclass=BaseModelMeta)
@@ -172,6 +180,7 @@ class BaseModel(ModelWorker):
     __pydantic__ = None
     __presave_actions__ = list()
     __presetters__ = dict()
+    _m2m_models = dict()
 
     id = IdField(name='id')  # After creation it will delete
 
