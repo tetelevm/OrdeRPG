@@ -22,5 +22,5 @@ class SingletonMeta(type):
 
 
 class Singleton(metaclass=SingletonMeta):
-    """A class for inheritance that calls QWE metaclass constructor."""
+    """A class for inheritance that calls SingletonMeta metaclass constructor."""
     pass
