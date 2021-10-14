@@ -161,9 +161,10 @@ class BaseModelMeta(DeclarativeMeta):
 
     @staticmethod
     def set_sqlite_arguments(cls):
-        pk_col = get_model_primary_key(cls).type
-        is_int_pk = isinstance(pk_col, Integer)
-        if is_int_pk:
+        pk = get_model_primary_key(cls)
+        is_int_pk = isinstance(pk.type, Integer)
+        is_increment = pk.autoincrement
+        if is_int_pk and is_increment:
             sqlite_dict = {'autoincrement': True, 'with_rowid': True}
             cls.__table__.dialect_options["sqlite"] = sqlite_dict
 
