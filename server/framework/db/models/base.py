@@ -57,6 +57,8 @@ class BaseModelMeta(DeclarativeMeta):
     - executes `_postinit_actions`
     """
 
+    base_model = None
+
     def __init__(cls, clsname, bases, dct):
         super().__init__(clsname, bases, dct)
         cls.postinit_functionality(cls, dct)
@@ -72,7 +74,7 @@ class BaseModelMeta(DeclarativeMeta):
         the new model class.
         """
 
-        dct.setdefault('_postinit_actions', [])
+        mcs.set_changeable_clsattr(dct)
         mcs.add_info(dct)
         mcs.generate_tablename(dct, clsname)
         mcs.create_default_pk(dct)
@@ -92,6 +94,19 @@ class BaseModelMeta(DeclarativeMeta):
             action: Callable
             action(cls)
         del cls._postinit_actions
+
+    @classmethod
+    def set_changeable_clsattr(mcs, dct: dict):
+        dct.setdefault('_postinit_actions', [])
+
+        if mcs.base_model is not None:
+            list_of_changeable = [
+                '__presave_actions__',
+                '__presetters__',
+                '_m2m_models',
+            ]
+            for attr in list_of_changeable:
+                dct[attr] = mcs.base_model.__annotations__[attr]()
 
     @staticmethod
     def add_info(dct):
@@ -172,17 +187,21 @@ class BaseModelMeta(DeclarativeMeta):
 ModelWorker = declarative_base(name='ModelWorker', metaclass=BaseModelMeta)
 
 
+def _add_base_model_into_base_model_meta(base_model):
+    BaseModelMeta.base_model = base_model
+
+
 class BaseModel(ModelWorker):
     """A class for inheritance, passes the creation to its metaclass."""
     __abstract__ = True
-    _postinit_actions = []  #
+    _postinit_actions = [_add_base_model_into_base_model_meta]  # drop after create
 
     __pydantic__ = None
-    __presave_actions__ = list()
-    __presetters__ = dict()
-    _m2m_models = dict()
+    __presave_actions__: list = list()
+    __presetters__: dict = dict()
+    _m2m_models: dict = dict()
 
-    id = IdField(name='id')  # After creation it will delete
+    id = IdField(name='id')  # after creation it will delete
 
     def __init__(self, *args, **kwargs):
         for (name, field_class) in self.__table__.columns.items():
