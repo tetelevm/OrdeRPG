@@ -39,6 +39,7 @@ class FieldRelationshipColumn(FieldDefault, ABC):
         self.column_type = column_type
         self.parent_column = ForeignKey(fk_name)
         kwargs.setdefault('nullable', False)
+
         super().__init__(**kwargs)
 
 
@@ -106,7 +107,8 @@ class ForeignKeyRelationship(FieldRelationshipRelationship):
     def __init__(self, clsname: str, as_name: str, **kwargs):
         kwargs.pop('backref', None)
         kwargs.pop('back_populates', None)
-        super().__init__(clsname, back_populates=as_name, **kwargs)
+        to = kwargs.pop('to_table', clsname)
+        super().__init__(to, back_populates=as_name, **kwargs)
 
 
 class ForeignKeyField(FieldRelationshipClass):
@@ -148,17 +150,22 @@ class ForeignKeyField(FieldRelationshipClass):
         fk_column_code = f'{parent_tablename}.{parent_pk_field.name}'
         fk_field_name = f'{parent_tablename}_{parent_pk_field.name}'
         fk_type = parent_pk_field.column_type
+
+        if hasattr(model_from, fk_field_name):
+            attr = getattr(model_from, fk_field_name)
+            raise AlreadyExistsError(fk_field_name, clsname, attr.__repr__())
         column = self.column_class(fk_type, fk_column_code, **self.column_kwargs)
-        column_attr = getattr(model_from, fk_field_name, column)
-        if column is not column_attr:
-            raise AlreadyExistsError(fk_field_name, clsname, column)
         setattr(model_from, fk_field_name, column)
 
         # set parent relationship
+        if hasattr(self.model_to, parent_fieldname):
+            attr = getattr(self.model_to, parent_fieldname)
+            raise AlreadyExistsError(
+                parent_fieldname,
+                parent_clsname,
+                attr.__repr__()
+            )
         parent_relation = self.relation_class(clsname, field_name, **self.parent_kwargs)
-        parent_attr = getattr(self.model_to, parent_fieldname, parent_relation)
-        if parent_attr is not parent_relation:
-            raise AlreadyExistsError(parent_fieldname, parent_clsname, parent_attr)
         setattr(self.model_to, parent_fieldname, parent_relation)
 
         # set self relationship
