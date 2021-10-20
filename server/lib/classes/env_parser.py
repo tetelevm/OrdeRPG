@@ -9,8 +9,8 @@ from typing import Union, Iterable, Mapping
 from ..exceptions import ExceptionFromFormattedDoc
 
 
-_all_ = ['env_parser']
-__all__ = _all_ + ['EnvParser']
+_all_ = ["env_parser"]
+__all__ = _all_ + ["EnvParser"]
 
 
 STR_OR_ITER = Union[str, Iterable[str]]
@@ -30,7 +30,7 @@ class EnvParser:
     """
 
     class IncorrectStringError(ExceptionFromFormattedDoc):
-        """ Incorrect string in the variable file. """
+        """Incorrect string in the variable file."""
         __doc__ = """ File "{}" str {}: string <{}> is incorrect """
 
     def __init__(self):
@@ -110,7 +110,7 @@ class EnvParser:
         Reads and parses config file and writes results to own cache.
         """
 
-        def read_val_from_string(raw_string: str) -> FROM_STRING_TYPE:
+        def read_val_from_string(raw_line: str) -> FROM_STRING_TYPE:
             """
             Parses line by `=` sign and returns variable name with value
             and success result. If the string begins with `#` it is
@@ -131,15 +131,15 @@ class EnvParser:
             >>> # ((), False)
             """
 
-            string = raw_string.lstrip().rstrip()
-            if not string or string.startswith('#'):
+            line = raw_line.lstrip().rstrip()
+            if not line or line.startswith("#"):
                 return (), True
 
-            eq_index = string.find('=')
+            eq_index = line.find("=")
             if eq_index == -1:
                 return (), False
 
-            name, value = string[:eq_index], string[eq_index + 1:]
+            name, value = line[:eq_index], line[eq_index + 1 :]
             name, value = name.rstrip(), value.lstrip()
 
             return (name, value), True
@@ -148,7 +148,7 @@ class EnvParser:
             text = file.read()
 
         data = dict()
-        for (i, string) in enumerate(text.split('\n')):
+        for (i, string) in enumerate(text.split("\n")):
             result, succ = read_val_from_string(string)
             if not succ:
                 raise self.IncorrectStringError(file_path, i + 1, string)
@@ -166,8 +166,12 @@ class EnvParser:
         if file_path not in self._files_cache:
             self._read_file_into_cache(file_path)
 
-        return self.get_arg_from_dict(name, self._files_cache[file_path],
-                                      *args, **kwargs)
+        return self.get_arg_from_dict(
+            name,
+            self._files_cache[file_path],
+            *args,
+            **kwargs
+        )
 
     @classmethod
     def get_arg_from_environ(cls, name: STR_OR_ITER, *args, **kwargs) -> any:
@@ -183,23 +187,30 @@ class EnvParser:
         A wrapper around `.get_arg_from_file()` that sets up '.envs' file
         in the `file_path` variable in advance.
         """
-        settings = getattr(self, 'settings', None)
+
+        settings = getattr(self, "settings", None)
         if settings is None:
             raise FileNotFoundError("Unknown location of file '.envs'")
 
-        file = settings.home_path / '.envs'
+        file = settings.home_path / ".envs"
         return self.get_arg_from_file(name, file, *args, **kwargs)
 
-    def get_arg_from_configs_file(self, name: STR_OR_ITER, *args, **kwargs) -> any:
+    def get_arg_from_configs_file(
+            self,
+            name: STR_OR_ITER,
+            *args,
+            **kwargs
+    ) -> any:
         """
         A wrapper around `.get_arg_from_file()` that sets up '.configs'
         file in the `file_path` variable in advance.
         """
-        settings = getattr(self, 'settings', None)
+
+        settings = getattr(self, "settings", None)
         if settings is None:
             raise FileNotFoundError("Unknown location of file '.configs'")
 
-        file = settings.home_path / '.configs'
+        file = settings.home_path / ".configs"
         return self.get_arg_from_file(name, file, *args, **kwargs)
 
 

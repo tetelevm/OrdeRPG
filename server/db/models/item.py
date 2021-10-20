@@ -9,7 +9,7 @@ from .location import ShopModel
 from .fight import CharacteristicModel
 
 
-__all__ = ['ItemTypeModel', 'ItemModel']
+__all__ = ["ItemTypeModel", "ItemModel"]
 
 
 class ItemTypeModel(BaseModel):
@@ -20,6 +20,6 @@ class ItemModel(BaseModel):
     type = ForeignKeyField(ItemTypeModel)
     name = StringField(40, nullable=False)
     description = StringField()
-    characteristics = ManyToManyField(CharacteristicModel, backref='items')
+    characteristics = ManyToManyField(CharacteristicModel, backref="items")
     shops = ManyToManyField(ShopModel)
     min_level = IntegerField(default=0)

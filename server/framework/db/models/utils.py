@@ -1,15 +1,17 @@
 from types import FunctionType
+
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from pydantic import create_model as create_pydantic_model
+
 from ..fields.base import FieldDefault
 
 
 __all__ = [
-    'generate_pydantic_model',
-    'attribute_presetter',
-    'get_model_primary_key',
-    'droppable_attribute',
-    'PostInitCreator',
+    "generate_pydantic_model",
+    "attribute_presetter",
+    "get_model_primary_key",
+    "droppable_attribute",
+    "PostInitCreator",
 ]
 
 
@@ -18,7 +20,7 @@ def generate_pydantic_model(dct: dict, model_name: str = None) -> type:
     # The basis of the code is taken from
     # https://github.com/tiangolo/pydantic-sqlalchemy/blob/master/pydantic_sqlalchemy/main.py
 
-    model_name = model_name or dct['__tablename__']
+    model_name = model_name or dct["__tablename__"]
 
     columns = (
         (name, field)

@@ -7,25 +7,25 @@ from .field_mixins import FieldExecutable, FieldMixinMinMax
 
 
 __all__ = [
-    'IdField',
-    'PositiveIntegerField',
-    'CoefficientField',
-    'PasswordField',
-    'RandomStringField',
+    "IdField",
+    "PositiveIntegerField",
+    "CoefficientField",
+    "PasswordField",
+    "RandomStringField",
 ]
 
 
 class IdField(IntegerField):
     """IntegerField, with arguments for primary_key."""
 
-    if settings.database.get('type', None) == 'sqlite':
+    if settings.database.get("type", None) == "sqlite":
         column_type = INTEGER
 
     _default_kwargs = {
-        'autoincrement': True,
-        'index': True,
-        'primary_key': True,
-        'unique': True,
+        "autoincrement": True,
+        "index": True,
+        "primary_key": True,
+        "unique": True,
     }
 
 
@@ -36,7 +36,7 @@ class PositiveIntegerField(IntegerField, FieldMixinMinMax):
 class CoefficientField(FloatField, FieldMixinMinMax):
     """A field for storing Float type coefficients."""
 
-    def __init__(self, min_value=0., max_value=1., *args, **kwargs):
+    def __init__(self, min_value=0.0, max_value=1.0, *args, **kwargs):
         self.min_value = min_value
         self.max_value = max_value
         super().__init__(*args, **kwargs)
@@ -74,7 +74,7 @@ class RandomStringField(StringField, FieldExecutable):
         desired length.
         """
 
-        length = kwargs.get('length', None) or self.column_type.length
+        length = kwargs.get("length", None) or self.column_type.length
         if length is None:
-            raise ValueError('Length of random string is <None>!')
+            raise ValueError("Length of random string is <None>!")
         return generate_random_advanced_string(length)

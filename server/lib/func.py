@@ -13,23 +13,23 @@ import string
 
 
 _all_ = [
-    'generate_random_string',
-    'generate_random_advanced_string',
-    'with_randomize',
+    "generate_random_string",
+    "generate_random_advanced_string",
+    "with_randomize",
 ]
 __all__ = _all_ + [
-    'int_to_bytes',
-    'str_to_bytes',
-    'camel_to_snake',
-    'default_alphabet',
-    'advanced_alphabet',
+    "int_to_bytes",
+    "str_to_bytes",
+    "camel_to_snake",
+    "default_alphabet",
+    "advanced_alphabet",
 ]
 
 
 def int_to_bytes(i: int) -> bytes:
     """Translates an `int` type value into their `bytes` form."""
     i = abs(i)
-    return i.to_bytes((i.bit_length() + 7) // 8, 'big')
+    return i.to_bytes((i.bit_length() + 7) // 8, "big")
 
 
 def str_to_bytes(data: any) -> bytes:
@@ -37,7 +37,7 @@ def str_to_bytes(data: any) -> bytes:
     Converts the value to its string form, and then translates the string
     form to bytes.
     """
-    return bytes(str(data), encoding='utf-8')
+    return bytes(str(data), encoding="utf-8")
 
 
 def with_randomize(funk):
@@ -49,16 +49,16 @@ def with_randomize(funk):
     # Yes, this value is generated each time for each function.
     # Computes quickly, but allows adequate collapse of the code.
     _static_data_for_random = (
-        str_to_bytes(time.time().hex()) +
-        int_to_bytes(id(object)) +
-        int_to_bytes(sys.api_version) +
-        int_to_bytes(sys.hexversion) +
-        str_to_bytes(os.name) +
-        str_to_bytes(os.getcwd()) +
-        str_to_bytes(sys.executable) +
-        str_to_bytes(sys.builtin_module_names) +
-        int_to_bytes(os.getpid()) +
-        str_to_bytes(os.environ)
+        str_to_bytes(time.time().hex())
+        + int_to_bytes(id(object))
+        + int_to_bytes(sys.api_version)
+        + int_to_bytes(sys.hexversion)
+        + str_to_bytes(os.name)
+        + str_to_bytes(os.getcwd())
+        + str_to_bytes(sys.executable)
+        + str_to_bytes(sys.builtin_module_names)
+        + int_to_bytes(os.getpid())
+        + str_to_bytes(os.environ)
     )
 
     def randomize(*args, **kwargs):
@@ -69,12 +69,12 @@ def with_randomize(funk):
         """
         # Calculated each time the function is called
         random_params = (
-            str_to_bytes(time.time().hex()) +
-            int_to_bytes(random.getrandbits(100)) +
-            os.urandom(100) +
-            int_to_bytes(id(object())) +
-            _static_data_for_random +
             str_to_bytes(time.time().hex())
+            + int_to_bytes(random.getrandbits(100))
+            + os.urandom(100)
+            + int_to_bytes(id(object()))
+            + _static_data_for_random
+            + str_to_bytes(time.time().hex())
         )
         random.seed(random_params)
 
@@ -91,12 +91,15 @@ def with_randomize(funk):
 default_alphabet = string.ascii_letters + string.digits
 
 @with_randomize
-def generate_random_string(length: int, alphabet: Sequence = default_alphabet) -> str:
+def generate_random_string(
+        length: int,
+        alphabet: Sequence = default_alphabet
+) -> str:
     """
     Generates a random string of the desired length from the given
     alphabet.
     """
-    return ''.join(random.choices(alphabet, k=length))
+    return "".join(random.choices(alphabet, k=length))
 
 
 # 94 characters
@@ -110,8 +113,8 @@ def generate_random_advanced_string(length: int) -> str:
     return generate_random_string(length, advanced_alphabet)
 
 
-pattern_before = re.compile('(.)([A-Z][a-z]+)')
-pattern_after = re.compile('([a-z0-9])([A-Z])')
+pattern_before = re.compile("(.)([A-Z][a-z]+)")
+pattern_after = re.compile("([a-z0-9])([A-Z])")
 
 def camel_to_snake(name: str) -> str:
     """
@@ -123,7 +126,8 @@ def camel_to_snake(name: str) -> str:
     >>> camel_to_snake('NAMEnameNAME')  # 'nam_ename_name'
     >>> camel_to_snake('Name_name__NAME_NaMe')  # 'name_name__name__na_me'
     """
+
     # code from https://stackoverflow.com/a/1176023/11301238
-    name = pattern_before.sub(r'\1_\2', name)
-    name = pattern_after.sub(r'\1_\2', name)
+    name = pattern_before.sub(r"\1_\2", name)
+    name = pattern_after.sub(r"\1_\2", name)
     return name.lower()

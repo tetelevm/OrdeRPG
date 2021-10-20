@@ -12,22 +12,22 @@ from .custom import IdField
 
 
 _all_ = [
-    'FieldRelationshipColumn',
-    'FieldRelationshipRelationship',
-    'FieldRelationshipClass',
+    "FieldRelationshipColumn",
+    "FieldRelationshipRelationship",
+    "FieldRelationshipClass",
 
-    'ForeignKeyColumn',
-    'ForeignKeyRelationship',
+    "ForeignKeyColumn",
+    "ForeignKeyRelationship",
 
-    'OnoToOneColumn',
-    'OnoToOneRelationship',
+    "OnoToOneColumn",
+    "OnoToOneRelationship",
 
-    'ManyToManyRelationship',
+    "ManyToManyRelationship",
 ]
 __all__ = _all_ + [
-    'ForeignKeyField',
-    'OnoToOneField',
-    'ManyToManyField',
+    "ForeignKeyField",
+    "OnoToOneField",
+    "ManyToManyField",
 ]
 
 
@@ -42,21 +42,21 @@ class FieldRelationshipColumn(FieldDefault, ABC):
     def __init__(self, column_type, fk_name, **kwargs):
         self.column_type = column_type
         self.parent_column = ForeignKey(fk_name)
-        kwargs.setdefault('nullable', False)
+        kwargs.setdefault("nullable", False)
 
         super().__init__(**kwargs)
 
 
 class FieldRelationshipRelationship(RelationshipProperty, ABC):
     def __str__(self):
-        return '{r_type} to <{model_to}> (as {backref})'.format(
+        return "{r_type} to <{model_to}> (as {backref})".format(
             r_type=self.__class__.__name__,
             model_to=self.argument,
             backref=self.backref,
         )
 
     def __repr__(self):
-        return '{r_type}(to={model_to}, as={backref})'.format(
+        return "{r_type}(to={model_to}, as={backref})".format(
             r_type=self.__class__.__name__,
             model_to=self.argument,
             backref=self.backref,
@@ -72,9 +72,9 @@ class FieldRelationshipClass(ABC):
         to_name = (
             self.model_to.__name__
             if self.model_to is not None else
-            '(unknown)'
+            "(unknown)"
         )
-        return '{r_type} to {model_to}'.format(
+        return "{r_type} to {model_to}".format(
             r_type=self.__class__.__name__,
             model_to=to_name,
         )
@@ -83,9 +83,9 @@ class FieldRelationshipClass(ABC):
         to_name = (
             self.model_to.__name__
             if self.model_to is not None else
-            '(unknown)'
+            "(unknown)"
         )
-        return '{r_type}(to={model_to})'.format(
+        return "{r_type}(to={model_to})".format(
             r_type=self.__class__.__name__,
             model_to=to_name,
         )
@@ -107,8 +107,8 @@ class FieldRelationshipClass(ABC):
         parent_pk_field: FieldDefault = get_model_primary_key(model)
 
         fk_column_type = parent_pk_field.column_type
-        fk_column_code = f'{parent_tablename}.{parent_pk_field.name}'
-        fk_field_name = f'{parent_tablename}_{parent_pk_field.name}'
+        fk_column_code = f"{parent_tablename}.{parent_pk_field.name}"
+        fk_field_name = f"{parent_tablename}_{parent_pk_field.name}"
         return fk_column_type, fk_column_code, fk_field_name
 
 
@@ -121,9 +121,10 @@ class ForeignKeyColumn(FieldRelationshipColumn):
 
 class ForeignKeyRelationship(FieldRelationshipRelationship):
     def __init__(self, clsname: str, as_name: str, **kwargs):
-        kwargs.pop('backref', None)
-        back_populates = kwargs.pop('back_populates', as_name)
-        to = kwargs.pop('to_table', clsname)
+        kwargs.pop("backref", None)
+        back_populates = kwargs.pop("back_populates", as_name)
+        to = kwargs.pop("to_table", clsname)
+
         super().__init__(to, back_populates=back_populates, **kwargs)
 
 
@@ -196,7 +197,7 @@ class ForeignKeyField(FieldRelationshipClass):
             dct: dict,
     ) -> None:
         action = PostInitCreator(self.postinit_create_field, clsname, field_name)
-        dct['_postinit_actions'].append(action)
+        dct["_postinit_actions"].append(action)
 
 
 # ======== ONE TO ONE KEY ========
@@ -208,13 +209,14 @@ class OnoToOneColumn(ForeignKeyColumn):
 
 class OnoToOneRelationship(ForeignKeyRelationship):
     def __init__(self, clsname: str, as_name: str, **kwargs):
-        kwargs['uselist'] = False
+        kwargs["uselist"] = False
         super().__init__(clsname, as_name, **kwargs)
 
 
 class OnoToOneField(ForeignKeyField):
     column_class = OnoToOneColumn
     relation_class = OnoToOneRelationship
+
 
 # ======== MANY TO MANY KEY ========
 
@@ -225,9 +227,10 @@ class ManyToManyColumn(FieldRelationshipColumn):
 
 class ManyToManyRelationship(FieldRelationshipRelationship):
     def __init__(self, clsname: str, through: str, as_name: str, **kwargs):
-        kwargs.pop('backref', None)
-        kwargs.pop('back_populates', None)
-        kwargs.pop('secondary', None)
+        kwargs.pop("backref", None)
+        kwargs.pop("back_populates", None)
+        kwargs.pop("secondary", None)
+
         super().__init__(
             clsname,
             secondary=through,
@@ -261,8 +264,8 @@ class ManyToManyField(FieldRelationshipClass):
         child_tname = model.__tablename__
         child_clsname = model.__name__
 
-        tablename = f'm2m_{parent_tname}_{child_tname}'
-        clsname = f'M2M_{parent_clsname}_{child_clsname}'
+        tablename = f"m2m_{parent_tname}_{child_tname}"
+        clsname = f"M2M_{parent_clsname}_{child_clsname}"
         if self.children_name is None:
             self.children_name = child_tname
 
@@ -281,10 +284,9 @@ class ManyToManyField(FieldRelationshipClass):
         setattr(model, field_name, child_rel)
         setattr(self.model_to, self.children_name, parent_rel)
 
-
         (
             (child_type, child_fk_code, child_fk_name),
-            (parent_type, parent_fk_code, parent_fk_name)
+            (parent_type, parent_fk_code, parent_fk_name),
         ) = (
             self.get_model_pk_options(model),
             self.get_model_pk_options(self.model_to),
@@ -293,13 +295,13 @@ class ManyToManyField(FieldRelationshipClass):
         child_fk = ManyToManyColumn(child_type, child_fk_code)
         parent_fk = ManyToManyColumn(parent_type, parent_fk_code)
 
-        Info = type('Info', (), {'tablename': tablename, 'default_pk': False})
+        Info = type("Info", (), {"tablename": tablename, "default_pk": False})
         self.through = model.__class__(
             clsname,
-            (model.__class__.base_model, ),
+            (model.__class__.base_model,),
             {
-                'id': IdField(autoincrement=False),
-                'Info': Info,
+                "id": IdField(autoincrement=False),
+                "Info": Info,
                 child_fk_name: child_fk,
                 parent_fk_name: parent_fk,
             }
@@ -318,7 +320,7 @@ class ManyToManyField(FieldRelationshipClass):
         dct.pop(field_name)
         if self.through is None:
             action_create = PostInitCreator(self.postinit_create_model, field_name)
-            dct['_postinit_actions'].append(action_create)
+            dct["_postinit_actions"].append(action_create)
 
         add_action = self.add_model_to_m2m_models
-        dct['_postinit_actions'].append(add_action)
+        dct["_postinit_actions"].append(add_action)

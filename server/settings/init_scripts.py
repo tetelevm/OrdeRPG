@@ -9,5 +9,5 @@ from server.lib import Hasher, env_parser
 __all__ = []
 
 
-algorithms = env_parser.get_arg_from_configs_file('hash_algorithms', None)
+algorithms = env_parser.get_arg_from_configs_file("hash_algorithms", None)
 Hasher.set_algorithms(algorithms)

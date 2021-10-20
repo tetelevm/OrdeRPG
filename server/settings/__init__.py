@@ -10,7 +10,7 @@ from server.lib.classes import env_parser as envs
 from server.framework.settings import settings
 
 
-__all__ = ['settings']
+__all__ = ["settings"]
 
 
 def import_default():
@@ -18,9 +18,9 @@ def import_default():
 
 
 def set_run_context():
-    settings.test = envs.get_arg_from_configs_file('test')
-    settings.debug = envs.get_arg_from_configs_file('debug')
-    settings.production = envs.get_arg_from_configs_file('production')
+    settings.test = envs.get_arg_from_configs_file("test")
+    settings.debug = envs.get_arg_from_configs_file("debug")
+    settings.production = envs.get_arg_from_configs_file("production")
 
 
 def run_init_scripts():

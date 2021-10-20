@@ -1,6 +1,6 @@
 """
-File with the model for inheritance in other database models. Also here is
-the metaclass that generates the models.
+File with the model for inheritance in other database models. Also here
+is the metaclass that generates the models.
 """
 
 from typing import Callable, Any
@@ -21,12 +21,12 @@ from .utils import (
 
 
 _all_ = [
-    'BaseModel',
-    'DefaultInfo',
+    "BaseModel",
+    "DefaultInfo",
 ]
 __all__ = _all_ + [
-    'BaseModelMeta',
-    'ModelWorker',
+    "BaseModelMeta",
+    "ModelWorker",
 ]
 
 
@@ -86,8 +86,8 @@ class BaseModelMeta(DeclarativeMeta):
     def postinit_functionality(mcs, cls, dct: dict):
         cls.__pydantic__ = generate_pydantic_model(dct)
 
-        if hasattr(cls, '__table__'):
-            if settings.database.get('type', None) == 'sqlite':
+        if hasattr(cls, "__table__"):
+            if settings.database.get("type", None) == "sqlite":
                 cls.set_sqlite_arguments(cls)
 
         for action in cls._postinit_actions:
@@ -97,23 +97,23 @@ class BaseModelMeta(DeclarativeMeta):
 
     @classmethod
     def set_changeable_clsattr(mcs, dct: dict):
-        dct.setdefault('_postinit_actions', [])
+        dct.setdefault("_postinit_actions", [])
 
         if mcs.base_model is not None:
             list_of_changeable = [
-                '__presave_actions__',
-                '__presetters__',
-                '_m2m_models',
+                "__presave_actions__",
+                "__presetters__",
+                "_m2m_models",
             ]
             for attr in list_of_changeable:
                 dct[attr] = mcs.base_model.__annotations__[attr]()
 
     @staticmethod
     def add_info(dct):
-        info = dct.get('Info', None)
+        info = dct.get("Info", None)
         info_bases = ((info,) if info is not None else tuple()) + (DefaultInfo,)
-        Info = type('Info', info_bases, {})
-        dct['Info'] = Info
+        Info = type("Info", info_bases, {})
+        dct["Info"] = Info
 
     @staticmethod
     def generate_tablename(dct: dict, clsname: str):
@@ -122,17 +122,18 @@ class BaseModelMeta(DeclarativeMeta):
         You can specify your own table name.
         Warning! Changes `tablename` attribute of `Info`.
         """
-        info = dct['Info']
-        tablename = getattr(info, 'tablename', None)
+
+        info = dct["Info"]
+        tablename = getattr(info, "tablename", None)
 
         if not tablename:
-            tablename = dct.pop('__tablename__', None)
+            tablename = dct.pop("__tablename__", None)
 
         if not tablename:
-            tablename = clsname.removesuffix('Model')
+            tablename = clsname.removesuffix("Model")
             tablename = camel_to_snake(tablename)
 
-        dct['__tablename__'] = tablename
+        dct["__tablename__"] = tablename
         info.tablename = tablename
 
     @staticmethod
@@ -142,10 +143,10 @@ class BaseModelMeta(DeclarativeMeta):
         `default_pk` is used.
         """
 
-        if dct['Info'].default_pk:
-            dct['id'] = IdField(name='id')
-        if dct.get('__abstract__', False):
-            dct.pop('id', None)
+        if dct["Info"].default_pk:
+            dct["id"] = IdField(name="id")
+        if dct.get("__abstract__", False):
+            dct.pop("id", None)
 
     @staticmethod
     def set_relation_fields(clsname: str, dct: dict):
@@ -164,8 +165,9 @@ class BaseModelMeta(DeclarativeMeta):
         pk = get_model_primary_key(cls)
         is_int_pk = isinstance(pk.type, Integer)
         is_increment = pk.autoincrement
+
         if is_int_pk and is_increment:
-            sqlite_dict = {'autoincrement': True, 'with_rowid': True}
+            sqlite_dict = {"autoincrement": True, "with_rowid": True}
             cls.__table__.dialect_options["sqlite"] = sqlite_dict
 
     @staticmethod
@@ -176,7 +178,7 @@ class BaseModelMeta(DeclarativeMeta):
                 presetter: attribute_presetter = dct.pop(field_name)
                 presetters[presetter.to_attr] = presetter.call
 
-        dct['__presetters__'] = presetters
+        dct["__presetters__"] = presetters
 
     @staticmethod
     def drop_droppable_by_decorator(dct: dict[str, Any]):
@@ -185,7 +187,7 @@ class BaseModelMeta(DeclarativeMeta):
                 dct.pop(field_name)
 
 
-ModelWorker = declarative_base(name='ModelWorker', metaclass=BaseModelMeta)
+ModelWorker = declarative_base(name="ModelWorker", metaclass=BaseModelMeta)
 
 
 def _add_base_model_into_base_model_meta(base_model):
@@ -194,6 +196,7 @@ def _add_base_model_into_base_model_meta(base_model):
 
 class BaseModel(ModelWorker):
     """A class for inheritance, passes the creation to its metaclass."""
+
     __abstract__ = True
     _postinit_actions = [_add_base_model_into_base_model_meta]  # drop after create
 
@@ -202,7 +205,7 @@ class BaseModel(ModelWorker):
     __presetters__: dict = dict()
     _m2m_models: dict = dict()
 
-    id = IdField(name='id')  # after creation it will delete
+    id = IdField(name="id")  # after creation it will delete
 
     def __init__(self, *args, **kwargs):
         for (name, field_class) in self.__table__.columns.items():

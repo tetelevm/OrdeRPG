@@ -1,16 +1,14 @@
-from sqlalchemy.sql.sqltypes import (
-    BigInteger, Float, String, DateTime, Boolean
-)
+from sqlalchemy.sql.sqltypes import BigInteger, Float, String, DateTime, Boolean
 
 from .base import FieldDefault
 
 
 __all__ = [
-    'IntegerField',
-    'FloatField',
-    'StringField',
-    'DateTimeField',
-    'BooleanField',
+    "IntegerField",
+    "FloatField",
+    "StringField",
+    "DateTimeField",
+    "BooleanField",
 ]
 
 
@@ -23,11 +21,13 @@ class IntegerField(FieldDefault):
     saves programmers from overflow problems that were unexpected at the
     beginning of development.
     """
+
     column_type = BigInteger
 
 
 class FloatField(FieldDefault):
     """Standard field of type Float."""
+
     column_type = Float
 
 
@@ -48,9 +48,11 @@ class StringField(FieldDefault):
 
 class DateTimeField(FieldDefault):
     """Standard field with DateTime type."""
+
     column_type = DateTime
 
 
 class BooleanField(FieldDefault):
     """Standard field with Boolean type."""
+
     column_type = Boolean

@@ -5,15 +5,16 @@ from .engine import DbEngine
 
 
 _all_ = [
-    'DbSession',
-    'db_session',
+    "DbSession",
+    "db_session",
 ]
 __all__ = _all_ + [
-    'DbSessionCreator',
+    "DbSessionCreator",
 ]
 
 
 DbSessionCreator = sessionmaker(bind=DbEngine)
+
 
 class DbSession(Singleton):
     def __init__(self):

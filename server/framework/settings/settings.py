@@ -5,7 +5,7 @@ The file contains a singleton class of settings.
 from server.lib import Singleton, ExceptionFromFormattedDoc
 
 
-__all__ = ['Settings']
+__all__ = ["Settings"]
 
 
 class Settings(Singleton):
@@ -36,7 +36,7 @@ class Settings(Singleton):
 
     def __init__(self):
         super(Settings, self).__init__()
-        super(Settings, self).__setattr__('__settings', dict())
+        super(Settings, self).__setattr__("__settings", dict())
 
     def __getattribute__(self, attr: str) -> any:
         try:
@@ -44,8 +44,8 @@ class Settings(Singleton):
         except AttributeError:
             pass
 
-        settings_dict = self.__dict__['__settings']
-        if attr in ['_Settings__settings', '__settings']:
+        settings_dict = self.__dict__["__settings"]
+        if attr in ["_Settings__settings", "__settings"]:
             return settings_dict
 
         attr = str(attr).lower()

@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 
 
 __all__ = [
-    'FieldExecutable',
-    'FieldMixinMinMax',
+    "FieldExecutable",
+    "FieldMixinMinMax",
 ]
 
 
@@ -23,9 +23,9 @@ class FieldMixinMinMax(FieldExecutable):
     max_value: float = None
 
     def execute(self, *args, **kwargs):
-        value = kwargs.get('value', 0)
-        if getattr(self, 'min_value', None) is not None:
+        value = kwargs.get("value", 0)
+        if getattr(self, "min_value", None) is not None:
             value = max(value, self.min_value)
-        if getattr(self, 'max_value', None) is not None:
+        if getattr(self, "max_value", None) is not None:
             value = min(value, self.max_value)
         return value

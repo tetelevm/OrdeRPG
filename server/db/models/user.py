@@ -22,7 +22,7 @@ from server.framework.db.fields import (
 from server.settings import settings
 
 
-__all__ = ['UserModel', 'PersonModel']
+__all__ = ["UserModel", "PersonModel"]
 
 
 class UserModel(BaseModel):
@@ -39,7 +39,7 @@ class UserModel(BaseModel):
     last_login = DateTimeField()
     is_deleted = BooleanField(default=False, nullable=False)
 
-    @attribute_presetter('password')
+    @attribute_presetter("password")
     def password_setter(self, value):
         return self.generate_password(value)
 
@@ -63,5 +63,5 @@ class PersonModel(BaseModel):
     experience = IntegerField(default=0, nullable=False)
     money = IntegerField(default=0, nullable=False)
     rating = IntegerField(default=0, nullable=False)
-    kill_ratio = CoefficientField(default=0., nullable=False)
+    kill_ratio = CoefficientField(default=0.0, nullable=False)
     fights_count = PositiveIntegerField(default=0, nullable=False)

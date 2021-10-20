@@ -2,8 +2,8 @@
 Basic implementation of the singleton pattern
 """
 
-_all_ = ['Singleton']
-__all__ = _all_ + ['SingletonMeta']
+_all_ = ["Singleton"]
+__all__ = _all_ + ["SingletonMeta"]
 
 
 class SingletonMeta(type):

@@ -4,7 +4,7 @@ from server.framework.db.fields import (
 )
 
 
-__all__ = ['CharacteristicModel']
+__all__ = ["CharacteristicModel"]
 
 
 class CharacteristicModel(BaseModel):

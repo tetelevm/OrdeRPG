@@ -5,7 +5,7 @@ from server.framework.db.fields import (
 )
 
 
-__all__ = ['LocationModel', 'ShopModel']
+__all__ = ["LocationModel", "ShopModel"]
 
 
 class LocationModel(BaseModel):

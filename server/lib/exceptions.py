@@ -3,8 +3,8 @@ The submodule contains useful utilities for exceptions.
 """
 
 __all__ = [
-    'ExceptionFromDoc',
-    'ExceptionFromFormattedDoc',
+    "ExceptionFromDoc",
+    "ExceptionFromFormattedDoc",
 ]
 
 
@@ -59,9 +59,9 @@ class ExceptionFromFormattedDoc(ExceptionFromDoc):
         try:
             msg = self.__doc__.format(*formats)
         except IndexError:
-            msg = 'The error could not be formatted, but an error of the form'
-            msg += '\n'
+            msg = "The error could not be formatted, but an error of the form"
+            msg += "\n"
             msg += self.__doc__
-            msg += '\n'
+            msg += "\n"
             msg += str(formats)
         super(ExceptionFromFormattedDoc, self).__init__(msg)

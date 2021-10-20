@@ -11,6 +11,6 @@ __all__ = []
 
 # Directory with `main.py`
 s.home_path = Path(__file__).parent.parent.parent
-s.server_path = (Path() / 'server').resolve()
+s.server_path = (Path() / "server").resolve()
 
-s.hash_salt = envs.get_arg_from_envs_file('hash_salt')
+s.hash_salt = envs.get_arg_from_envs_file("hash_salt")

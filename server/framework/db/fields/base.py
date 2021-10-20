@@ -6,10 +6,10 @@ from sqlalchemy.sql.type_api import TypeEngine
 
 
 _all_ = [
-    'FieldDefault',
+    "FieldDefault",
 ]
 __all__ = _all_ + [
-    'FieldDefaultMeta',
+    "FieldDefaultMeta",
 ]
 
 
@@ -32,13 +32,13 @@ class FieldDefaultMeta(ABCMeta, TraversibleType):
         classes will overwrite the same arguments of parent classes.
         """
 
-        cls_default_kwargs = dct.get('_default_kwargs', dict())
+        cls_default_kwargs = dct.get("_default_kwargs", dict())
         parent_default_kwargs = {
             key: val
             for cls in bases
-            for (key, val) in getattr(cls, '_default_kwargs', dict()).items()
+            for (key, val) in getattr(cls, "_default_kwargs", dict()).items()
         }
-        dct['_default_kwargs'] = parent_default_kwargs | cls_default_kwargs
+        dct["_default_kwargs"] = parent_default_kwargs | cls_default_kwargs
 
         return dct
 
@@ -58,7 +58,7 @@ class FieldDefault(ABC, Column, metaclass=FieldDefaultMeta):
 
     def __init__(self, **kwargs):
         kwargs = self._default_kwargs | kwargs
-        kwargs.pop('type_', None)
+        kwargs.pop("type_", None)
 
         args = [self.column_type]
         if self.parent_column is not None:
@@ -67,7 +67,7 @@ class FieldDefault(ABC, Column, metaclass=FieldDefaultMeta):
         super().__init__(*args, **kwargs)
 
     def __repr__(self):
-        return super().__repr__().replace('Column', self.__class__.__name__)
+        return super().__repr__().replace("Column", self.__class__.__name__)
 
     # TODO: here and in all child classes: explore and add `params` and `unique_params`
     def params(self, *optionaldict, **kwargs):
