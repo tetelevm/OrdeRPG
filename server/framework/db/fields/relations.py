@@ -8,6 +8,7 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 from server.lib import ExceptionFromFormattedDoc
 from ..models.utils import get_model_primary_key, PostInitCreator
 from .base import FieldDefault
+from .custom import IdField
 
 
 _all_ = [
@@ -20,10 +21,13 @@ _all_ = [
 
     'OnoToOneColumn',
     'OnoToOneRelationship',
+
+    'ManyToManyRelationship',
 ]
 __all__ = _all_ + [
     'ForeignKeyField',
     'OnoToOneField',
+    'ManyToManyField',
 ]
 
 
@@ -95,6 +99,18 @@ class FieldRelationshipClass(ABC):
     ) -> None:
         pass
 
+    @staticmethod
+    def get_model_pk_options(
+            model: DeclarativeMeta
+    ) -> tuple[FieldDefault, str, str]:
+        parent_tablename = model.__tablename__
+        parent_pk_field: FieldDefault = get_model_primary_key(model)
+
+        fk_column_type = parent_pk_field.column_type
+        fk_column_code = f'{parent_tablename}.{parent_pk_field.name}'
+        fk_field_name = f'{parent_tablename}_{parent_pk_field.name}'
+        return fk_column_type, fk_column_code, fk_field_name
+
 
 # ======== FOREIGN KEY ========
 
@@ -106,9 +122,9 @@ class ForeignKeyColumn(FieldRelationshipColumn):
 class ForeignKeyRelationship(FieldRelationshipRelationship):
     def __init__(self, clsname: str, as_name: str, **kwargs):
         kwargs.pop('backref', None)
-        kwargs.pop('back_populates', None)
+        back_populates = kwargs.pop('back_populates', as_name)
         to = kwargs.pop('to_table', clsname)
-        super().__init__(to, back_populates=as_name, **kwargs)
+        super().__init__(to, back_populates=back_populates, **kwargs)
 
 
 class ForeignKeyField(FieldRelationshipClass):
@@ -141,15 +157,12 @@ class ForeignKeyField(FieldRelationshipClass):
             field_name: str,
     ):
         self_tablename = model_from.__tablename__
-        parent_tablename = self.model_to.__tablename__
-        parent_pk_field: FieldDefault = get_model_primary_key(self.model_to)
         parent_clsname = self.model_to.__name__
         parent_fieldname = self.children_name or self_tablename
 
         # set database column
-        fk_column_code = f'{parent_tablename}.{parent_pk_field.name}'
-        fk_field_name = f'{parent_tablename}_{parent_pk_field.name}'
-        fk_type = parent_pk_field.column_type
+        parent_pk_options = self.get_model_pk_options(self.model_to)
+        (fk_type, fk_column_code, fk_field_name) = parent_pk_options
 
         if hasattr(model_from, fk_field_name):
             attr = getattr(model_from, fk_field_name)
@@ -169,7 +182,11 @@ class ForeignKeyField(FieldRelationshipClass):
         setattr(self.model_to, parent_fieldname, parent_relation)
 
         # set self relationship
-        self_relation = self.relation_class(parent_clsname, parent_fieldname, **self.self_kwargs)
+        self_relation = self.relation_class(
+            parent_clsname,
+            parent_fieldname,
+            **self.self_kwargs
+        )
         setattr(model_from, field_name, self_relation)
 
     def generate_fields(
@@ -201,3 +218,107 @@ class OnoToOneField(ForeignKeyField):
 
 # ======== MANY TO MANY KEY ========
 
+
+class ManyToManyColumn(FieldRelationshipColumn):
+    pass
+
+
+class ManyToManyRelationship(FieldRelationshipRelationship):
+    def __init__(self, clsname: str, through: str, as_name: str, **kwargs):
+        kwargs.pop('backref', None)
+        kwargs.pop('back_populates', None)
+        kwargs.pop('secondary', None)
+        super().__init__(
+            clsname,
+            secondary=through,
+            back_populates=as_name,
+            **kwargs
+        )
+
+
+class ManyToManyField(FieldRelationshipClass):
+    def __init__(
+            self,
+            model,
+            *,
+            backref: str = None,
+            self_kwargs: dict = None,
+            parent_kwargs: dict = None,
+            through: DeclarativeMeta = None,
+    ):
+        self_kwargs = (self_kwargs is not None and self_kwargs) or dict()
+        parent_kwargs = (parent_kwargs is not None and parent_kwargs) or dict()
+
+        self.model_to = model
+        self.children_name = backref
+        self.self_kwargs = self_kwargs
+        self.parent_kwargs = parent_kwargs
+        self.through = through
+
+    def postinit_create_model(self, model: DeclarativeMeta, field_name: str):
+        parent_tname = self.model_to.__tablename__
+        parent_clsname = self.model_to.__name__
+        child_tname = model.__tablename__
+        child_clsname = model.__name__
+
+        tablename = f'm2m_{parent_tname}_{child_tname}'
+        clsname = f'M2M_{parent_clsname}_{child_clsname}'
+        if self.children_name is None:
+            self.children_name = child_tname
+
+        child_rel = ManyToManyRelationship(
+            parent_clsname,
+            tablename,
+            self.children_name,
+            **self.self_kwargs
+        )
+        parent_rel = ManyToManyRelationship(
+            child_clsname,
+            tablename,
+            field_name,
+            **self.parent_kwargs
+        )
+        setattr(model, field_name, child_rel)
+        setattr(self.model_to, self.children_name, parent_rel)
+
+
+        (
+            (child_type, child_fk_code, child_fk_name),
+            (parent_type, parent_fk_code, parent_fk_name)
+        ) = (
+            self.get_model_pk_options(model),
+            self.get_model_pk_options(self.model_to),
+        )
+
+        child_fk = ManyToManyColumn(child_type, child_fk_code)
+        parent_fk = ManyToManyColumn(parent_type, parent_fk_code)
+
+        Info = type('Info', (), {'tablename': tablename, 'default_pk': False})
+        self.through = model.__class__(
+            clsname,
+            (model.__class__.base_model, ),
+            {
+                'id': IdField(autoincrement=False),
+                'Info': Info,
+                child_fk_name: child_fk,
+                parent_fk_name: parent_fk,
+            }
+        )
+
+    def add_model_to_m2m_models(self, model):
+        model._m2m_models[self.model_to.__tablename__] = self.through
+        self.model_to._m2m_models[model.__tablename__] = self.through
+
+    def generate_fields(
+            self,
+            clsname: str,
+            field_name: str,
+            dct: dict,
+    ) -> None:
+        dct.pop(field_name)
+        if self.through is None:
+            action_create = PostInitCreator(self.postinit_create_model, field_name)
+            dct['_postinit_actions'].append(action_create)
+
+        add_action = self.add_model_to_m2m_models
+        dct['_postinit_actions'].append(add_action)
