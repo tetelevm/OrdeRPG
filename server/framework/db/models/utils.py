@@ -1,4 +1,5 @@
 from types import FunctionType
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 from pydantic import create_model as create_pydantic_model
 from ..fields.base import FieldDefault
 
@@ -56,7 +57,7 @@ class droppable_attribute:
         self.value = attr
 
 
-def get_model_primary_key(model):
+def get_model_primary_key(model: DeclarativeMeta) -> FieldDefault:
     return model.__table__.primary_key.columns[0]
 
 

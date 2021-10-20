@@ -16,6 +16,6 @@ from .user import *
 __all__ = (
     __user_all__
     + __fight_all__
-    +__item_all__
+    + __item_all__
     + __location_all__
 )

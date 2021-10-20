@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy.engine import create_engine
 from ...settings import settings
 
 
