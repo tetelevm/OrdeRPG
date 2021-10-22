@@ -228,3 +228,6 @@ class BaseModel(ModelWorker):
         if key in self.__presetters__:
             value = self.__presetters__[key](self, value)
         super().__setattr__(key, value)
+
+
+BaseModel: BaseModelMeta

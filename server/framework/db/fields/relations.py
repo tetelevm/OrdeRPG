@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from typing import Union
 
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import RelationshipProperty
@@ -22,6 +23,7 @@ _all_ = [
     "OnoToOneColumn",
     "OnoToOneRelationship",
 
+    "ManyToManyColumn",
     "ManyToManyRelationship",
 ]
 __all__ = _all_ + [
@@ -226,15 +228,28 @@ class ManyToManyColumn(FieldRelationshipColumn):
 
 
 class ManyToManyRelationship(FieldRelationshipRelationship):
-    def __init__(self, clsname: str, through: str, as_name: str, **kwargs):
-        kwargs.pop("backref", None)
-        kwargs.pop("back_populates", None)
+    def __init__(
+            self,
+            clsname: str = None,
+            through: Union[str, DeclarativeMeta] = None,
+            as_name: str = None,
+            **kwargs
+    ):
+        if isinstance(through, DeclarativeMeta):
+            clsname = through.__name__
+            through = through.__tablename__
+
+        if as_name is None:
+            as_name = kwargs.pop("back_populates", None)
+        if as_name is not None:
+            kwargs.pop("backref", None)
+            kwargs["back_populates"] = as_name
+
         kwargs.pop("secondary", None)
 
         super().__init__(
             clsname,
             secondary=through,
-            back_populates=as_name,
             **kwargs
         )
 
@@ -258,7 +273,7 @@ class ManyToManyField(FieldRelationshipClass):
         self.parent_kwargs = parent_kwargs
         self.through = through
 
-    def postinit_create_model(self, model: DeclarativeMeta, field_name: str):
+    def postinit_create_model(self, model: DeclarativeMeta):
         parent_tname = self.model_to.__tablename__
         parent_clsname = self.model_to.__name__
         child_tname = model.__tablename__
@@ -268,21 +283,6 @@ class ManyToManyField(FieldRelationshipClass):
         clsname = f"M2M_{parent_clsname}_{child_clsname}"
         if self.children_name is None:
             self.children_name = child_tname
-
-        child_rel = ManyToManyRelationship(
-            parent_clsname,
-            tablename,
-            self.children_name,
-            **self.self_kwargs
-        )
-        parent_rel = ManyToManyRelationship(
-            child_clsname,
-            tablename,
-            field_name,
-            **self.parent_kwargs
-        )
-        setattr(model, field_name, child_rel)
-        setattr(self.model_to, self.children_name, parent_rel)
 
         (
             (child_type, child_fk_code, child_fk_name),
@@ -307,6 +307,22 @@ class ManyToManyField(FieldRelationshipClass):
             }
         )
 
+    def set_fields(self, model: DeclarativeMeta, field_name: str):
+        child_rel = ManyToManyRelationship(
+            self.model_to.__name__,
+            self.through.__tablename__,
+            self.children_name,
+            **self.self_kwargs
+        )
+        parent_rel = ManyToManyRelationship(
+            model.__name__,
+            self.through.__tablename__,
+            field_name,
+            **self.parent_kwargs
+        )
+        setattr(model, field_name, child_rel)
+        setattr(self.model_to, self.children_name, parent_rel)
+
     def add_model_to_m2m_models(self, model):
         model._m2m_models[self.model_to.__tablename__] = self.through
         self.model_to._m2m_models[model.__tablename__] = self.through
@@ -319,8 +335,10 @@ class ManyToManyField(FieldRelationshipClass):
     ) -> None:
         dct.pop(field_name)
         if self.through is None:
-            action_create = PostInitCreator(self.postinit_create_model, field_name)
-            dct["_postinit_actions"].append(action_create)
+            dct["_postinit_actions"].append(self.postinit_create_model)
+
+        set_fields = PostInitCreator(self.set_fields, field_name)
+        dct["_postinit_actions"].append(set_fields)
 
         add_action = self.add_model_to_m2m_models
         dct["_postinit_actions"].append(add_action)
