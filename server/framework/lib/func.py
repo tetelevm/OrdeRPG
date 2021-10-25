@@ -3,19 +3,22 @@ Sub-module with simple functional utilities, the main requirement for
 which is to be a function.
 """
 
-from typing import Sequence
 import re
 import os
 import sys
 import time
 import random
 import string
+from pathlib import Path
+from types import FunctionType
+from typing import Sequence, Generator
 
 
 _all_ = [
     "generate_random_string",
     "generate_random_advanced_string",
     "with_randomize",
+    "get_all_files_from_directory",
 ]
 __all__ = _all_ + [
     "int_to_bytes",
@@ -23,6 +26,7 @@ __all__ = _all_ + [
     "camel_to_snake",
     "default_alphabet",
     "advanced_alphabet",
+    "get_all_files_from_directory_generator",
 ]
 
 
@@ -131,3 +135,26 @@ def camel_to_snake(name: str) -> str:
     name = pattern_before.sub(r"\1_\2", name)
     name = pattern_after.sub(r"\1_\2", name)
     return name.lower()
+
+
+def get_all_files_from_directory_generator(
+        path,
+        filter_func: FunctionType = None
+) -> Generator[str, None, None]:
+    def get_all_files_generator():
+        for (folder, _, files) in os.walk(path):
+            folder = Path(folder)
+            for file in files:
+                yield str(folder / file)
+
+    generator = get_all_files_generator()
+    if filter_func is not None:
+        generator = filter(filter_func, generator)
+    return generator
+
+
+def get_all_files_from_directory(
+        path,
+        filter_func: FunctionType = None
+) -> list[str]:
+    return list(get_all_files_from_directory_generator(path, filter_func))
