@@ -1,6 +1,6 @@
 from sqlalchemy.sql.sqltypes import INTEGER
 
-from server.lib import generate_random_advanced_string
+from ...lib import generate_random_advanced_string
 from ...settings import settings
 from .primitive import IntegerField, FloatField, StringField
 from .field_mixins import FieldExecutable, FieldMixinMinMax

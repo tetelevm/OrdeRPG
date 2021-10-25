@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.sqltypes import Integer
 
-from server.lib import camel_to_snake
+from ...lib import camel_to_snake
 from ...settings import settings
 from ..connection.session import db_session
 from ..fields import FieldExecutable, FieldRelationshipClass, IdField

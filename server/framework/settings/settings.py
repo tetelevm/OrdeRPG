@@ -2,7 +2,7 @@
 The file contains a singleton class of settings.
 """
 
-from server.lib import Singleton, ExceptionFromFormattedDoc
+from ..lib import Singleton, ExceptionFromFormattedDoc
 
 
 __all__ = ["Settings"]

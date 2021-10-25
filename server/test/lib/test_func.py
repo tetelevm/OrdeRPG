@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase
 
-from server.lib.func import *
+from server.framework.lib.func import *
 
 
 __all__ = ["FuncTest"]

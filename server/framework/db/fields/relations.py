@@ -6,7 +6,7 @@ from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import RelationshipProperty
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 
-from server.lib import ExceptionFromFormattedDoc
+from ...lib import ExceptionFromFormattedDoc
 from ..models.utils import get_model_primary_key, PostInitCreator
 from .base import FieldDefault
 from .custom import IdField

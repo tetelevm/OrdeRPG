@@ -1,6 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 
-from server.lib import Singleton
+from ...lib import Singleton
 from .engine import DbEngine
 
 
