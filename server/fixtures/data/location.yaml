@@ -1,0 +1,16 @@
+location:
+  data:
+    - name: village
+    - name: town
+      description: description of the city location
+
+
+shop:
+  depends:
+    - location
+  data:
+    - location_id: 1
+
+    - location_id: 2
+      sales_ratio: 4.0
+      rebate: 0.2

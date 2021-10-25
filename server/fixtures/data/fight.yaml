@@ -1,0 +1,16 @@
+characteristic:
+  data:
+    - token: damage
+      name: Damage
+
+    - token: armor
+      name: Armor
+
+    - token: xp
+      name: Life
+
+    - token: precision
+      name: Precision
+
+    - token: dodge
+      name: Dodge
