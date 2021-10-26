@@ -23,12 +23,12 @@ item:
 
     - type_id: 2
       name: shoes
-      description:
+      description: The most common shoes
       shops: [1]
 
     - type_id: 2
       name: helmet
-      description:
+      description: Helmet. Horns at extra charge.
       shops: [2]
       min_level: 4
 
@@ -61,10 +61,6 @@ characteristic_item:
     - value: 5
       item_id: 3
       characteristic_token: xp
-
-    - value:
-      item_id:
-      characteristic_token:
 
     - value: 1
       item_id: 3
