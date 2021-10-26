@@ -52,7 +52,7 @@ item:
 
       - value: 3
         item_id: 2
-        characteristic_token: хз
+        characteristic_token: xp
 
       - value: 1
         item_id: 1
