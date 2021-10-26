@@ -33,47 +33,47 @@ item:
       min_level: 4
 
 
-  characteristic_item:
-    depends:
-      - characteristic
-      - item
-    data:
-      - value: 3
-        item_id: 1
-        characteristic_token: damage
+characteristic_item:
+  depends:
+    - characteristic
+    - item
+  data:
+    - value: 3
+      item_id: 1
+      characteristic_token: damage
 
-      - value: 2
-        item_id: 3
-        characteristic_token: dodge
+    - value: 2
+      item_id: 3
+      characteristic_token: dodge
 
-      - value: 35  # 350 damage is a lie :)
-        item_id: 2
-        characteristic_token: damage
+    - value: 35  # 350 damage is a lie :)
+      item_id: 2
+      characteristic_token: damage
 
-      - value: 3
-        item_id: 2
-        characteristic_token: xp
+    - value: 3
+      item_id: 2
+      characteristic_token: xp
 
-      - value: 1
-        item_id: 1
-        characteristic_token: armor
+    - value: 1
+      item_id: 1
+      characteristic_token: armor
 
-      - value: 5
-        item_id: 3
-        characteristic_token: xp
+    - value: 5
+      item_id: 3
+      characteristic_token: xp
 
-      - value:
-        item_id:
-        characteristic_token:
+    - value:
+      item_id:
+      characteristic_token:
 
-      - value: 1
-        item_id: 3
-        characteristic_token: armor
+    - value: 1
+      item_id: 3
+      characteristic_token: armor
 
-      - value: 2
-        item_id: 4
-        characteristic_token: armor
+    - value: 2
+      item_id: 4
+      characteristic_token: armor
 
-      - value: 6
-        item_id: 4
-        characteristic_token: xp
+    - value: 6
+      item_id: 4
+      characteristic_token: xp
