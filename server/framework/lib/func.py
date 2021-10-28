@@ -10,8 +10,7 @@ import time
 import random
 import string
 from pathlib import Path
-from types import FunctionType
-from typing import Sequence, Generator
+from typing import Sequence, Generator, Callable
 
 
 _all_ = [
@@ -19,6 +18,7 @@ _all_ = [
     "generate_random_advanced_string",
     "with_randomize",
     "get_all_files_from_directory",
+    "frozendict",
 ]
 __all__ = _all_ + [
     "int_to_bytes",
@@ -28,6 +28,9 @@ __all__ = _all_ + [
     "advanced_alphabet",
     "get_all_files_from_directory_generator",
 ]
+
+
+# ======================================================================
 
 
 def int_to_bytes(i: int) -> bytes:
@@ -42,6 +45,9 @@ def str_to_bytes(data: any) -> bytes:
     form to bytes.
     """
     return bytes(str(data), encoding="utf-8")
+
+
+# ======================================================================
 
 
 def with_randomize(funk):
@@ -91,6 +97,9 @@ def with_randomize(funk):
     return randomize
 
 
+# ======================================================================
+
+
 # 62 characters
 default_alphabet = string.ascii_letters + string.digits
 
@@ -117,6 +126,9 @@ def generate_random_advanced_string(length: int) -> str:
     return generate_random_string(length, advanced_alphabet)
 
 
+# ======================================================================
+
+
 pattern_before = re.compile("(.)([A-Z][a-z]+)")
 pattern_after = re.compile("([a-z0-9])([A-Z])")
 
@@ -137,9 +149,12 @@ def camel_to_snake(name: str) -> str:
     return name.lower()
 
 
+# ======================================================================
+
+
 def get_all_files_from_directory_generator(
         path,
-        filter_func: FunctionType = None
+        filter_func: Callable[[str], bool] = None
 ) -> Generator[str, None, None]:
     def get_all_files_generator():
         for (folder, _, files) in os.walk(path):
@@ -155,6 +170,23 @@ def get_all_files_from_directory_generator(
 
 def get_all_files_from_directory(
         path,
-        filter_func: FunctionType = None
+        filter_func: Callable[[str], bool] = None
 ) -> list[str]:
     return list(get_all_files_from_directory_generator(path, filter_func))
+
+
+# ======================================================================
+
+
+class frozendict(dict):
+    def __setitem__(self, key, value):
+        raise NotImplementedError("Cannot add or change values")
+
+    def __delitem__(self, key):
+        raise NotImplementedError("Cannot add or change values")
+
+    def __repr__(self):
+        return 'f' + super().__repr__()
+
+
+# ======================================================================
