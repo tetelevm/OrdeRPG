@@ -1,6 +1,5 @@
 import yaml
 import json
-import graphlib
 from typing import Callable, IO, Optional, Any
 
 from ...lib.func import get_all_files_from_directory_generator, frozendict
@@ -37,13 +36,15 @@ DATA_TYPE = dict[TABLENAME, TABLE_DATA]
 
 
 class FixtureReader:
+    data: DATA_TYPE
+
     def __init__(self, data_path=None, data_type='yaml'):
         self.supported_types = frozendict({
             "yaml": self.add_data_from_yaml,
             "json": self.add_data_from_json,
         })
 
-        self.data: DATA_TYPE = dict()
+        self.data = dict()
         if data_path:
             self.add_data_from_type(data_path, data_type)
 
@@ -107,19 +108,3 @@ class FixtureReader:
 
         data.setdefault("depends", [])
         return data
-
-    def sort_data(self):
-        sorter = graphlib.TopologicalSorter()
-        for (model_name, model_data) in self.data.items():
-            sorter.add(model_name, *model_data["depends"])
-
-        try:
-            topological_order = list(sorter.static_order())
-        except graphlib.CycleError as exc:
-            msg = (
-                "The order of the dependencies of the fixtures is looped:\n"
-                + ' <-> '.join(exc.args[1])
-            )
-            raise ValueError(msg)
-
-        return topological_order
