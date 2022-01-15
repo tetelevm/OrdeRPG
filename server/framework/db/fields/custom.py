@@ -6,13 +6,14 @@ from .primitive import IntegerField, FloatField, StringField
 from .field_mixins import FieldExecutable, FieldMixinMinMax
 
 
-__all__ = [
+__all_for_module__ = [
     "IdField",
     "PositiveIntegerField",
     "CoefficientField",
     "PasswordField",
     "RandomStringField",
 ]
+__all__ = __all_for_module__
 
 
 class IdField(IntegerField):

@@ -5,8 +5,8 @@ from typing import Callable, IO, Optional, Any
 from ...lib.func import get_all_files_from_directory_generator, frozendict
 
 
-_all_ = ["FixtureReader"]
-__all__ = _all_ + [
+__all_for_module__ = ["FixtureReader"]
+___all__ = __all_for_module__ + [
     "TABLENAME",
     "FIELD_NAME",
     "FIELD_VALUE",

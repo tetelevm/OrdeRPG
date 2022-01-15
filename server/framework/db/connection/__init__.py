@@ -1,8 +1,9 @@
-from .engine import __all__ as __engine_all__
-from .session import _all_ as _session_all_
+from .engine import __all_for_module__ as __engine_all__
+from .session import __all_for_module__ as __session_all__
 
 from .engine import *
 from .session import *
 
 
-__all__ = __engine_all__ + _session_all_
+__all_for_module__ = __engine_all__ + __session_all__
+__all__ = __all_for_module__

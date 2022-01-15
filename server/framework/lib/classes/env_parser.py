@@ -9,8 +9,8 @@ from typing import Union, Iterable, Mapping
 from ..exceptions import ExceptionFromFormattedDoc
 
 
-_all_ = ["env_parser"]
-__all__ = _all_ + ["EnvParser"]
+__all_for_module__ = ["env_parser"]
+__all__ = __all_for_module__ + ["EnvParser"]
 
 
 STR_OR_ITER = Union[str, Iterable[str]]

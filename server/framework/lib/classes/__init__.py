@@ -2,17 +2,18 @@
 A submodule with individual classes.
 """
 
-from .env_parser import _all_ as _env_parser_all_
-from .hasher import _all_ as _hasher_all_
-from .singleton import _all_ as _singleton_all_
+from .env_parser import __all_for_module__ as __env_parser_all__
+from .hasher import __all_for_module__ as __hasher_all__
+from .singleton import __all_for_module__ as __singleton_all__
 
 from .env_parser import *
 from .hasher import *
 from .singleton import *
 
 
-__all__ = (
-    _env_parser_all_ +
-    _hasher_all_ +
-    _singleton_all_
+__all_for_module__ = (
+    __env_parser_all__ +
+    __hasher_all__ +
+    __singleton_all__
 )
+__all__ = __all_for_module__

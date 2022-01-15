@@ -20,8 +20,8 @@ from hashlib import (
 from ..exceptions import ExceptionFromFormattedDoc
 
 
-_all_ = ["Hasher"]
-__all__ = _all_ + ["Shake", "bstring_cycle", "HashAlgAbstractType"]
+__all_for_module__ = ["Hasher"]
+__all__ = __all_for_module__ + ["Shake", "bstring_cycle", "HashAlgAbstractType"]
 
 
 class HashAlgAbstractType(ABC):

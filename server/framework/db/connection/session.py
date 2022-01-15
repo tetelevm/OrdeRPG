@@ -4,11 +4,11 @@ from ...lib import Singleton
 from .engine import DbEngine
 
 
-_all_ = [
+__all_for_module__ = [
     "DbSession",
     "db_session",
 ]
-__all__ = _all_ + [
+__all__ = __all_for_module__ + [
     "DbSessionCreator",
 ]
 

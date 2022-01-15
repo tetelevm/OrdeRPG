@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 
 
-__all__ = [
+__all_for_module__ = [
     "FieldExecutable",
     "FieldMixinMinMax",
 ]
+__all__ = __all_for_module__
 
 
 class FieldExecutable(ABC):

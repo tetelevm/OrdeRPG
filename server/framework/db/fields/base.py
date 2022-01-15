@@ -5,10 +5,10 @@ from sqlalchemy.sql.visitors import TraversibleType
 from sqlalchemy.sql.type_api import TypeEngine
 
 
-_all_ = [
+__all_for_module__ = [
     "FieldDefault",
 ]
-__all__ = _all_ + [
+__all__ = __all_for_module__ + [
     "FieldDefaultMeta",
 ]
 

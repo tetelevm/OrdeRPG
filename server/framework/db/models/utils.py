@@ -6,13 +6,14 @@ from pydantic import create_model as create_pydantic_model
 from ..fields.base import FieldDefault
 
 
-__all__ = [
+__all_for_module__ = [
     "generate_pydantic_model",
     "attribute_presetter",
     "get_model_primary_key",
     "droppable_attribute",
     "PostInitCreator",
 ]
+___all__ = __all_for_module__
 
 
 def generate_pydantic_model(dct: dict, model_name: str = None) -> type:

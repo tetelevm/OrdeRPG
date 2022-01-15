@@ -3,13 +3,14 @@ from sqlalchemy.sql.sqltypes import BigInteger, Float, String, DateTime, Boolean
 from .base import FieldDefault
 
 
-__all__ = [
+__all_for_module__ = [
     "IntegerField",
     "FloatField",
     "StringField",
     "DateTimeField",
     "BooleanField",
 ]
+__all__ = __all_for_module__
 
 
 class IntegerField(FieldDefault):

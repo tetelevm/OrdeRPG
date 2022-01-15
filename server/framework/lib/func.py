@@ -13,14 +13,14 @@ from pathlib import Path
 from typing import Sequence, Generator, Callable
 
 
-_all_ = [
+__all_for_module__ = [
     "generate_random_string",
     "generate_random_advanced_string",
     "with_randomize",
     "get_all_files_from_directory",
     "frozendict",
 ]
-__all__ = _all_ + [
+__all__ = __all_for_module__ + [
     "int_to_bytes",
     "str_to_bytes",
     "camel_to_snake",
@@ -134,7 +134,7 @@ pattern_after = re.compile("([a-z0-9])([A-Z])")
 
 def camel_to_snake(name: str) -> str:
     """
-    Translates NameCamelCase to name_snake_case
+    Translates NameCamelCase to name_snake_case.
 
     >>> camel_to_snake('NameNameName')  # 'name_name_name'
     >>> camel_to_snake('name11NameName')  # 'name11_name_name'

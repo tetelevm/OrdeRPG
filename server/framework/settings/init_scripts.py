@@ -8,6 +8,9 @@ from ..lib.classes.env_parser import env_parser
 from .settings import Settings
 
 
+__all__ = ["settings"]
+
+
 settings = Settings()
 settings.password_hasher = Hasher.hash
 

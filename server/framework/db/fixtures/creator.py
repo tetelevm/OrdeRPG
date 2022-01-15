@@ -4,7 +4,9 @@ from ...lib import frozendict
 from ..models.base import ModelWorker
 from .reader import DATA_TYPE
 
-__all__ = ["FixtureCreator"]
+
+__all_for_module__ = ["FixtureCreator"]
+__all__ = __all_for_module__
 
 
 class FixtureCreator:

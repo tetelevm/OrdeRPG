@@ -10,6 +10,7 @@ from sqlalchemy.sql.sqltypes import Integer
 
 from ...lib import camel_to_snake
 from ...settings import settings
+
 from ..connection.session import db_session
 from ..fields import FieldExecutable, FieldRelationshipClass, IdField
 from .utils import (
@@ -20,11 +21,11 @@ from .utils import (
 )
 
 
-_all_ = [
+__all_for_module__ = [
     "BaseModel",
     "DefaultInfo",
 ]
-__all__ = _all_ + [
+___all__ = __all_for_module__ + [
     "BaseModelMeta",
     "ModelWorker",
 ]

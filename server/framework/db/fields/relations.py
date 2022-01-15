@@ -12,7 +12,7 @@ from .base import FieldDefault
 from .custom import IdField
 
 
-_all_ = [
+__all_for_module__ = [
     "FieldRelationshipColumn",
     "FieldRelationshipRelationship",
     "FieldRelationshipClass",
@@ -26,7 +26,7 @@ _all_ = [
     "ManyToManyColumn",
     "ManyToManyRelationship",
 ]
-__all__ = _all_ + [
+__all__ = __all_for_module__ + [
     "ForeignKeyField",
     "OnoToOneField",
     "ManyToManyField",

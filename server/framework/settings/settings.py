@@ -5,7 +5,8 @@ The file contains a singleton class of settings.
 from ..lib import Singleton, ExceptionFromFormattedDoc
 
 
-__all__ = ["Settings"]
+__all_for_module__ = ["Settings"]
+__all__ = __all_for_module__
 
 
 class Settings(Singleton):

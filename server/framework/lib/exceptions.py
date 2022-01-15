@@ -2,10 +2,11 @@
 The submodule contains useful utilities for exceptions.
 """
 
-__all__ = [
+__all_for_module__ = [
     "ExceptionFromDoc",
     "ExceptionFromFormattedDoc",
 ]
+__all__ = __all_for_module__
 
 
 class ExceptionFromDoc(Exception):
