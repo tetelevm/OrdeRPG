@@ -179,6 +179,11 @@ def get_all_files_from_directory(
 
 
 class frozendict(dict):
+
+    @classmethod
+    def fromkeys(cls, iterable, value=None):
+        return cls(super().fromkeys(iterable, value))
+
     def __setitem__(self, key, value):
         raise NotImplementedError("Cannot add or change values")
 
@@ -186,7 +191,26 @@ class frozendict(dict):
         raise NotImplementedError("Cannot add or change values")
 
     def __repr__(self):
-        return 'f' + super().__repr__()
+        return "f" + super().__repr__()
+
+    def __ior__(self, other):
+        raise NotImplementedError("Cannot add or change values")
+
+    def setdefault(self, key="", default=None):
+        # Can be replaced by raising an NotImplementedError
+        return self.get(key, default)
+
+    def clear(self):
+        raise NotImplementedError("frozendict does not have clear method")
+
+    def pop(self, key):
+        raise NotImplementedError("frozendict does not have pop method")
+
+    def popitem(self):
+        raise NotImplementedError("frozendict does not have popitem method")
+
+    def update(self, m, **kwargs):
+        raise NotImplementedError("frozendict does not have update method")
 
 
 # ======================================================================
