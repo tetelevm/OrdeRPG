@@ -207,6 +207,7 @@ class BaseModel(ModelWorker):
     _m2m_models: dict = dict()
 
     id = IdField(name="id")  # after creation it will delete
+    __session__ = db_session
 
     def __init__(self, *args, **kwargs):
         for (name, field_class) in self.__table__.columns.items():
@@ -222,8 +223,8 @@ class BaseModel(ModelWorker):
         for action_name in self.__presave_actions__:
             action: Callable = getattr(self, action_name)
             action()
-        db_session.add(self)
-        db_session.commit()
+        self.__session__.add(self)
+        self.__session__.commit()
 
     def __setattr__(self, key, value):
         if key in self.__presetters__:

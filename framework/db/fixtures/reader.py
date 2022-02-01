@@ -1,6 +1,8 @@
-import yaml
 import json
+from pathlib import Path
 from typing import Callable, IO, Optional, Any
+
+import yaml
 
 from ...lib.func import get_all_files_from_directory_generator, frozendict
 
@@ -38,7 +40,7 @@ DATA_TYPE = dict[TABLENAME, TABLE_DATA]
 class FixtureReader:
     data: DATA_TYPE
 
-    def __init__(self, data_path=None, data_type='yaml'):
+    def __init__(self, data_path=None, data_type: str = 'yaml'):
         self.supported_types = frozendict({
             "yaml": self.add_data_from_yaml,
             "json": self.add_data_from_json,
@@ -48,7 +50,7 @@ class FixtureReader:
         if data_path:
             self.add_data_from_type(data_path, data_type)
 
-    def add_data_from_type(self, data_path, data_type='yaml'):
+    def add_data_from_type(self, data_path: str | Path, data_type: str = 'yaml'):
         try:
             method = self.supported_types[data_type]
         except KeyError:
@@ -60,12 +62,12 @@ class FixtureReader:
 
         method(data_path)
 
-    def add_data_from_yaml(self, data_path):
+    def add_data_from_yaml(self, data_path: str | Path):
         filter_yaml = lambda f: (f.endswith(".yaml") or f.endswith(".yml"))
         parse_yaml = yaml.safe_load
         self.pasre_data_from_files(data_path, filter_yaml, parse_yaml)
 
-    def add_data_from_json(self, data_path):
+    def add_data_from_json(self, data_path: str | Path):
         filter_json = lambda f: f.endswith(".json")
         parse_json = json.load
         self.pasre_data_from_files(data_path, filter_json, parse_json)
@@ -82,7 +84,7 @@ class FixtureReader:
 
     def pasre_data_from_files(
             self,
-            data_path,
+            data_path: str | Path,
             filter_func: Callable[[str], bool],
             parse_func: Callable[[IO], DATA_TYPE],
     ):

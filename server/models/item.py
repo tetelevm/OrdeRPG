@@ -13,7 +13,7 @@ from .location import ShopModel
 from .fight import CharacteristicModel
 
 
-__all__ = ["ItemTypeModel", "ItemModel"]
+__all__ = ["ItemTypeModel", "CharacteristicItemModel", "ItemModel"]
 
 
 class ItemTypeModel(BaseModel):

@@ -1,6 +1,5 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Union
 
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import RelationshipProperty
@@ -231,7 +230,7 @@ class ManyToManyRelationship(FieldRelationshipRelationship):
     def __init__(
             self,
             clsname: str = None,
-            through: Union[str, DeclarativeMeta] = None,
+            through: str | DeclarativeMeta = None,
             as_name: str = None,
             **kwargs
     ):
@@ -262,7 +261,7 @@ class ManyToManyField(FieldRelationshipClass):
             backref: str = None,
             self_kwargs: dict = None,
             parent_kwargs: dict = None,
-            through: DeclarativeMeta = None,
+            through: DeclarativeMeta | type = None,
     ):
         self_kwargs = (self_kwargs is not None and self_kwargs) or dict()
         parent_kwargs = (parent_kwargs is not None and parent_kwargs) or dict()
