@@ -8,7 +8,6 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 from ...lib import ExceptionFromFormattedDoc
 from ..models.utils import get_model_primary_key, PostInitCreator
 from .base import FieldDefault
-from .custom import IdField
 
 
 __all_for_module__ = [
@@ -294,12 +293,11 @@ class ManyToManyField(FieldRelationshipClass):
         child_fk = ManyToManyColumn(child_type, child_fk_code)
         parent_fk = ManyToManyColumn(parent_type, parent_fk_code)
 
-        Info = type("Info", (), {"tablename": tablename, "default_pk": False})
+        Info = type("Info", (), {"tablename": tablename})
         self.through = model.__class__(
             clsname,
             (model.__class__.base_model,),
             {
-                "id": IdField(autoincrement=False),
                 "Info": Info,
                 child_fk_name: child_fk,
                 parent_fk_name: parent_fk,
