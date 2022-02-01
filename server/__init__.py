@@ -5,5 +5,9 @@ the project.
 
 from server.settings import *
 from server.models import *
+from server.fixtures import create_fixtures
 
 from framework.start_script import *
+
+
+create_fixtures()

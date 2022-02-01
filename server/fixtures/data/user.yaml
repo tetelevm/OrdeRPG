@@ -13,7 +13,7 @@ user:
 
 person:
   depends:
-    - user_model
+    - user
   data:
     - user_id: 1
       type: 1

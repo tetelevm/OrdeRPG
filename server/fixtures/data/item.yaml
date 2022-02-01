@@ -10,26 +10,22 @@ item:
     - characteristic
     - shop
   data:
-    - type_id: 1
+    - item_type_id: 1
       name: dagger
       description: A very dangerous dagger
-      shops: [1, 2]
 
-    - type_id: 1
+    - item_type_id: 1
       name: rapier
       description: as much as 350 damage!
-      shops: []
       min_level: 6
 
-    - type_id: 2
+    - item_type_id: 2
       name: shoes
       description: The most common shoes
-      shops: [1]
 
-    - type_id: 2
+    - item_type_id: 2
       name: helmet
       description: Helmet. Horns at extra charge.
-      shops: [2]
       min_level: 4
 
 
@@ -38,38 +34,65 @@ characteristic_item:
     - characteristic
     - item
   data:
-    - value: 3
+    - id: 1
+      value: 3
       item_id: 1
       characteristic_token: damage
 
-    - value: 2
+    - id: 2
+      value: 2
       item_id: 3
       characteristic_token: dodge
 
-    - value: 35  # 350 damage is a lie :)
+    - id: 3
+      value: 35  # 350 damage is a lie :)
       item_id: 2
       characteristic_token: damage
 
-    - value: 3
+    - id: 4
+      value: 3
       item_id: 2
       characteristic_token: xp
 
-    - value: 1
+    - id: 5
+      value: 1
       item_id: 1
       characteristic_token: armor
 
-    - value: 5
+    - id: 6
+      value: 5
       item_id: 3
       characteristic_token: xp
 
-    - value: 1
+    - id: 7
+      value: 1
       item_id: 3
       characteristic_token: armor
 
-    - value: 2
+    - id: 8
+      value: 2
       item_id: 4
       characteristic_token: armor
 
-    - value: 6
+    - id: 9
+      value: 6
       item_id: 4
       characteristic_token: xp
+
+
+m2m_shop_item:
+  depends:
+    - shop
+    - item
+  data:
+    - item_id: 1
+      shop_id: 1
+
+    - item_id: 1
+      shop_id: 2
+
+    - item_id: 3
+      shop_id: 1
+
+    - item_id: 4
+      shop_id: 2
