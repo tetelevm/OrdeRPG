@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from server.framework.lib.exceptions import *
+from framework.lib.exceptions import *
 
 
 __all__ = ["ExceptionsTest"]

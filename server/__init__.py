@@ -4,6 +4,6 @@ the project.
 """
 
 from server.settings import *
-from server.db import *
+from server.models import *
 
-from server.framework.start_script import *
+from framework.start_script import *

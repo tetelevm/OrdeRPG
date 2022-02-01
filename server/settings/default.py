@@ -3,8 +3,8 @@ Settings that should always be set, regardless of the others.
 """
 
 from pathlib import Path
-from server.framework.lib.classes import env_parser as envs
-from server.framework.settings import settings as s
+from framework.lib.classes import env_parser as envs
+from framework.settings import settings as s
 
 __all__ = []
 

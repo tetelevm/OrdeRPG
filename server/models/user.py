@@ -4,11 +4,11 @@ user's business data.
 """
 
 from sqlalchemy import func
-from server.framework.db import (
+from framework.db import (
     attribute_presetter,
     BaseModel,
 )
-from server.framework.db.fields import (
+from framework.db.fields import (
     IntegerField,
     StringField,
     DateTimeField,

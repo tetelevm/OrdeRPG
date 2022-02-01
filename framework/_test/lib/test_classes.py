@@ -2,8 +2,8 @@ import os
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
-from server.framework.lib.classes import *
-from server.framework.lib.classes.hasher import Hasher, Shake, bstring_cycle
+from framework.lib.classes import *
+from framework.lib.classes.hasher import Hasher, Shake, bstring_cycle
 
 
 __all__ = ["ClassesTest"]

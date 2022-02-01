@@ -1,6 +1,6 @@
 import unittest
 
-from server.test import __all__ as tests
+from framework._test import *
 from server.test import *
 
 

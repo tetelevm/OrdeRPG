@@ -1,5 +1,5 @@
-from server.framework.db import BaseModel
-from server.framework.db.fields import (
+from framework.db import BaseModel
+from framework.db.fields import (
     IdField,
     IntegerField,
     FloatField,
@@ -7,7 +7,7 @@ from server.framework.db.fields import (
     ForeignKeyField,
     ManyToManyField,
 )
-from server.framework.db.fields.relations import ManyToManyColumn
+from framework.db.fields.relations import ManyToManyColumn
 
 from .location import ShopModel
 from .fight import CharacteristicModel

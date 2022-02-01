@@ -1,5 +1,5 @@
-from server.framework.db import BaseModel
-from server.framework.db.fields import (
+from framework.db import BaseModel
+from framework.db.fields import (
     StringField,
     OnoToOneField,
     CoefficientField,
