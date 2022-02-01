@@ -4,7 +4,7 @@ A class for parsing environment variables from `os.environ` or from files.
 
 import os
 import ast
-from typing import Union, Iterable, Mapping
+from typing import Iterable, Mapping
 
 from ..exceptions import ExceptionFromFormattedDoc
 
@@ -13,8 +13,8 @@ __all_for_module__ = ["env_parser"]
 __all__ = __all_for_module__ + ["EnvParser"]
 
 
-STR_OR_ITER = Union[str, Iterable[str]]
-FROM_STRING_TYPE = tuple[Union[tuple[str, str], tuple], bool]
+STR_OR_ITER = str | Iterable[str]
+FROM_STRING_TYPE = tuple[tuple[str, str] | tuple, bool]
 DEFAULT_OBJ = object()
 
 
@@ -31,7 +31,7 @@ class EnvParser:
 
     class IncorrectStringError(ExceptionFromFormattedDoc):
         """Incorrect string in the variable file."""
-        __doc__ = """ File "{}" str {}: string <{}> is incorrect """
+        __doc__ = """File "{}" str {}: string <{}> is incorrect."""
 
     def __init__(self):
         self._files_cache = dict()

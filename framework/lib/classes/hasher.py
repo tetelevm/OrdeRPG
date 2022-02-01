@@ -6,7 +6,7 @@ The main data hasher, as well as a couple of additional tools for it.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Iterator, Union
+from typing import Iterator
 from hashlib import (
     sha512,
     blake2b,
@@ -99,9 +99,9 @@ class Hasher:
     >>> # [<built-in function openssl_sha3_384>, <class '_blake2.blake2b'>]
     """
 
-    # Error when algorithm validity test fails
     class IncorrectAlgorithm(ExceptionFromFormattedDoc):
-        """{} algorithm: {}"""
+        """Error when algorithm validity test fails."""
+        __doc__ = """{} algorithm: {}"""
 
     supported_algorithms = {
         "blake2b": blake2b,
@@ -119,7 +119,7 @@ class Hasher:
     @classmethod
     def set_algorithms(
             cls,
-            algorithms: list[Union[str, HashAlgAbstractType]] = None
+            algorithms: list[str | HashAlgAbstractType] = None
     ):
         """
         A method to set up and test the validity of hashing algorithms.
@@ -140,7 +140,7 @@ class Hasher:
             for alg in algorithms:
                 _ = alg(b"Testing all algorithms for errors").digest()
         except (AttributeError, TypeError) as error:
-            raise cls.IncorrectAlgorithm(alg.__repr__(), ", ".join(error.args))
+            raise cls.IncorrectAlgorithm(repr(alg), ", ".join(error.args))
 
         cls.hash_algs = algorithms
 

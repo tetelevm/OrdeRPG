@@ -36,12 +36,12 @@ class Settings(Singleton):
         __doc__ = """Setting <{}> is not available in the project settings"""
 
     def __init__(self):
-        super(Settings, self).__init__()
-        super(Settings, self).__setattr__("__settings", dict())
+        super().__init__()
+        super().__setattr__("__settings", dict())
 
     def __getattribute__(self, attr: str) -> any:
         try:
-            return super(Settings, self).__getattribute__(attr)
+            return super().__getattribute__(attr)
         except AttributeError:
             pass
 

@@ -23,7 +23,7 @@ class FieldDefaultMeta(ABCMeta, TraversibleType):
 
     def __new__(mcs, clsname, bases, dct):
         dct = mcs.inherit_kwargs(bases, dct)
-        return super(FieldDefaultMeta, mcs).__new__(mcs, clsname, bases, dct)
+        return super().__new__(mcs, clsname, bases, dct)
 
     @staticmethod
     def inherit_kwargs(bases, dct):

@@ -24,7 +24,7 @@ class ExceptionFromDoc(Exception):
     def __init__(self, msg=None):
         if msg is None:
             msg = self.__doc__
-        super(ExceptionFromDoc, self).__init__(msg.lstrip().rstrip())
+        super().__init__(msg.lstrip().rstrip())
 
 
 class ExceptionFromFormattedDoc(ExceptionFromDoc):
@@ -65,4 +65,4 @@ class ExceptionFromFormattedDoc(ExceptionFromDoc):
             msg += self.__doc__
             msg += "\n"
             msg += str(formats)
-        super(ExceptionFromFormattedDoc, self).__init__(msg)
+        super().__init__(msg)
