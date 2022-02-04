@@ -1,13 +1,16 @@
 import json
+import graphlib
 from pathlib import Path
 from typing import Callable, IO, Optional, Any
 
 import yaml
 
 from ...lib.func import get_all_files_from_directory_generator, frozendict
+from ..peel import db_session
+from ..models.base import ModelWorker, BaseModelMeta
 
 
-__all_for_module__ = ["FixtureReader"]
+__all_for_module__ = ["FixtureCreator"]
 ___all__ = __all_for_module__ + [
     "TABLENAME",
     "FIELD_NAME",
@@ -37,30 +40,25 @@ TABLE_DATA = dict[
 DATA_TYPE = dict[TABLENAME, TABLE_DATA]
 
 
-class FixtureReader:
+class FixtureCreator:
     data: DATA_TYPE
+    models: frozendict[str, BaseModelMeta]
+    supported_types: dict[str, Callable[[str | Path], None]]
 
-    def __init__(self, data_path=None, data_type: str = 'yaml'):
-        self.supported_types = frozendict({
-            "yaml": self.add_data_from_yaml,
+    def __init__(self, data_path: str | Path = None, data_type: str = "yaml"):
+        self.supported_types = {
             "json": self.add_data_from_json,
+            "yaml": self.add_data_from_yaml,
+        }
+
+        self.models = frozendict({
+            model.class_.__tablename__: model.class_
+            for model in ModelWorker.registry.mappers
         })
 
         self.data = dict()
         if data_path:
             self.add_data_from_type(data_path, data_type)
-
-    def add_data_from_type(self, data_path: str | Path, data_type: str = 'yaml'):
-        try:
-            method = self.supported_types[data_type]
-        except KeyError:
-            msg = (
-                "{type} type is not supported. Try to parse the data yourself"
-                " and add the already processed data."
-            ).format(type=repr(data_type))
-            raise ValueError(msg)
-
-        method(data_path)
 
     def add_data_from_yaml(self, data_path: str | Path):
         filter_yaml = lambda f: (f.endswith(".yaml") or f.endswith(".yml"))
@@ -72,6 +70,33 @@ class FixtureReader:
         parse_json = json.load
         self.pasre_data_from_files(data_path, filter_json, parse_json)
 
+    def create(self):
+        order = self.get_creation_order()
+        for model_name in order:
+            if model_name not in self.models:
+                raise ValueError(f"Model named <{model_name}> is missing")
+
+        for model_name in order:
+            model = self.models[model_name]
+            data_list = self.data[model_name]["data"]
+            model_list = [model(**data) for data in data_list]
+            db_session.add(*model_list)
+        db_session.commit()
+
+    # ==============================
+
+    def add_data_from_type(self, data_path: str | Path, data_type: str = "yaml"):
+        try:
+            method = self.supported_types[data_type]
+        except KeyError:
+            msg = (
+                "{type} type is not supported. Try to parse the data yourself"
+                " and add the already processed data."
+            ).format(type=repr(data_type))
+            raise ValueError(msg)
+
+        method(data_path)
+
     def add_data(self, data: DATA_TYPE):
         for (tablename, model_data) in data.items():
             model_data = self.prepare_data(tablename, model_data)
@@ -80,7 +105,21 @@ class FixtureReader:
             else:
                 self.data[tablename] = model_data
 
-    # ==============================
+    def get_creation_order(self):
+        sorter = graphlib.TopologicalSorter()
+        for (model_name, model_data) in self.data.items():
+            sorter.add(model_name, *model_data["depends"])
+
+        try:
+            topological_order = list(sorter.static_order())
+        except graphlib.CycleError as exc:
+            msg = (
+                    "The order of the dependencies of the fixtures is looped:\n"
+                    + " <-> ".join(exc.args[1])
+            )
+            raise ValueError(msg)
+
+        return topological_order
 
     def pasre_data_from_files(
             self,

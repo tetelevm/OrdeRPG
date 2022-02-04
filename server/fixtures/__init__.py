@@ -1,5 +1,5 @@
 from pathlib import Path
-from framework.db.fixtures import FixtureReader, FixtureCreator
+from framework.db.utils import FixtureCreator
 from server.models import *
 
 
@@ -10,6 +10,5 @@ FIXTURE_FOLDER_PATH = Path(__file__).absolute().parent.absolute()
 
 
 def create_fixtures():
-    reader = FixtureReader(FIXTURE_FOLDER_PATH)
-    creator = FixtureCreator(reader.data)
+    creator = FixtureCreator(FIXTURE_FOLDER_PATH)
     creator.create()
