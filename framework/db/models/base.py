@@ -77,8 +77,7 @@ class BaseModelMeta(DeclarativeMeta):
 
         mcs.set_changeable_clsattr(dct)
         mcs.add_info(dct)
-        mcs.generate_tablename(dct, clsname)
-        mcs.create_default_pk(dct)
+        mcs.set_default_arguments(dct, clsname)
         mcs.set_relation_fields(clsname, dct)
         mcs.create_presetters_by_decorator(dct)
         mcs.drop_droppable_by_decorator(dct)
@@ -109,41 +108,32 @@ class BaseModelMeta(DeclarativeMeta):
     @staticmethod
     def add_info(dct):
         info = dct.get("Info", None)
-        info_bases = ((info,) if info is not None else tuple()) + (DefaultInfo,)
-        Info = type("Info", info_bases, {})
+        info_bases = ((info,) if info else tuple()) + (DefaultInfo,)
+
+        additional_attr = dict()
+        if not hasattr(info, "m2m_models"):
+            additional_attr["m2m_models"] = dict()
+        Info = type("Info", info_bases, additional_attr)
         dct["Info"] = Info
 
     @staticmethod
-    def generate_tablename(dct: dict, clsname: str):
-        """
-        Generates a table name in the database based on the class name.
-        You can specify your own table name.
-        Warning! Changes `tablename` attribute of `Info`.
-        """
-
+    def set_default_arguments(dct: dict, clsname: str):
         info = dct["Info"]
-        tablename = getattr(info, "tablename", None)
 
+        tablename = getattr(info, "tablename", None)
         if not tablename:
             tablename = dct.pop("__tablename__", None)
-
         if not tablename:
             tablename = clsname.removesuffix("Model")
             tablename = camel_to_snake(tablename)
-
         dct["__tablename__"] = tablename
         info.tablename = tablename
 
-    @staticmethod
-    def create_default_pk(dct: dict):
-        """
-        Creates a standard `id` field as `IdField(name='id')` if
-        `default_pk` is used.
-        """
+        dct.setdefault("__abstract__", False)
 
         if info.default_pk:
             dct["id"] = IdField(name="id")
-        if dct.get("__abstract__", False):
+        if dct["__abstract__"]:
             dct.pop("id", None)
 
     @staticmethod
