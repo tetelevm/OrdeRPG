@@ -1,4 +1,4 @@
-from framework.db import BaseModel
+from framework.db.models import BaseModel
 from framework.db.fields import (
     StringField,
 )

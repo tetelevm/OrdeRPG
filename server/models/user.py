@@ -4,7 +4,7 @@ user's business data.
 """
 
 from sqlalchemy import func
-from framework.db import (
+from framework.db.models import (
     attribute_presetter,
     BaseModel,
 )
