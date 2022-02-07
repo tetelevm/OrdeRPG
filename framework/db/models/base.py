@@ -11,10 +11,8 @@ from sqlalchemy.sql.sqltypes import Integer
 from ...lib import camel_to_snake
 from ...settings import settings
 
-from ..peel.session import db_session
 from ..fields import FieldExecutable, FieldRelationshipClass, IdField
 from .utils import (
-    generate_pydantic_model,
     attribute_presetter,
     droppable_attribute,
     get_model_primary_key,
@@ -85,8 +83,6 @@ class BaseModelMeta(DeclarativeMeta):
 
     @classmethod
     def postinit_functionality(mcs, cls, dct: dict):
-        cls.__pydantic__ = generate_pydantic_model(dct)
-
         if hasattr(cls, "__table__"):
             if settings.database.get("type", None) == "sqlite":
                 cls.set_sqlite_arguments(cls)
@@ -201,7 +197,6 @@ class BaseModel(ModelWorker):
     __abstract__ = True
     _postinit_actions = [_add_base_model_into_base_model_meta]  # drop after create
 
-    __pydantic__ = None
     __presave_actions__: list = list()
     __presetters__: dict = dict()
     _m2m_models: dict = dict()
