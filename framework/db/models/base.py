@@ -38,8 +38,10 @@ class DefaultInfo:
     metaclass.
     """
 
-    tablename = None
-    default_pk = True
+    tablename: str = None
+    default_pk: bool = True
+    m2m_models: dict[str, type] = dict()
+    manager: type = None
 
 
 class BaseModelMeta(DeclarativeMeta):
@@ -100,7 +102,6 @@ class BaseModelMeta(DeclarativeMeta):
             list_of_changeable = [
                 "__presave_actions__",
                 "__presetters__",
-                "_m2m_models",
             ]
             for attr in list_of_changeable:
                 dct[attr] = mcs.base_model.__annotations__[attr]()
@@ -140,7 +141,7 @@ class BaseModelMeta(DeclarativeMeta):
         `default_pk` is used.
         """
 
-        if dct["Info"].default_pk:
+        if info.default_pk:
             dct["id"] = IdField(name="id")
         if dct.get("__abstract__", False):
             dct.pop("id", None)
@@ -199,10 +200,8 @@ class BaseModel(ModelWorker):
 
     __presave_actions__: list = list()
     __presetters__: dict = dict()
-    _m2m_models: dict = dict()
 
     id = IdField(name="id")  # after creation it will delete
-    __session__ = db_session
 
     def __init__(self, *args, **kwargs):
         for (name, field_class) in self.__table__.columns.items():

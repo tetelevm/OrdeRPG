@@ -321,8 +321,8 @@ class ManyToManyField(FieldRelationshipClass):
         setattr(self.model_to, self.children_name, parent_rel)
 
     def add_model_to_m2m_models(self, model):
-        model._m2m_models[self.model_to.__tablename__] = self.through
-        self.model_to._m2m_models[model.__tablename__] = self.through
+        model.Info.m2m_models[self.model_to.__tablename__] = self.through
+        self.model_to.Info.m2m_models[model.__tablename__] = self.through
 
     def generate_fields(
             self,
