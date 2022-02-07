@@ -1,10 +1,12 @@
+from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from ...lib import Singleton
-from .engine import DbEngine
+from ...settings import settings
 
 
 __all_for_module__ = [
+    "DbEngine",
     "DbSession",
     "db_session",
 ]
@@ -12,6 +14,8 @@ __all__ = __all_for_module__ + [
     "DbSessionCreator",
 ]
 
+
+DbEngine = create_engine(settings.database["name"], echo=False)
 
 DbSessionCreator = sessionmaker(bind=DbEngine)
 

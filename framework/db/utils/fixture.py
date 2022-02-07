@@ -6,7 +6,7 @@ from typing import Callable, IO, Optional, Any
 import yaml
 
 from ...lib.func import get_all_files_from_directory_generator, frozendict
-from ..peel import db_session
+from ..managers.session import db_session
 from ..models.base import ModelWorker, BaseModelMeta
 
 
