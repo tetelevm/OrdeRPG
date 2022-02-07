@@ -214,12 +214,10 @@ class BaseModel(ModelWorker):
 
         super().__init__(*args, **kwargs)
 
-    def save(self):
+    def _set_presave(self):
         for action_name in self.__presave_actions__:
             action: Callable = getattr(self, action_name)
             action()
-        self.__session__.add(self)
-        self.__session__.commit()
 
     def __setattr__(self, key, value):
         if key in self.__presetters__:

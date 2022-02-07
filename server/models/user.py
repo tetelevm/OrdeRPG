@@ -50,9 +50,6 @@ class UserModel(BaseModel):
             settings.hash_salt
         )
 
-    def check_auth(self):
-        pass
-
 
 class PersonModel(BaseModel):
     """A user model containing business logic."""

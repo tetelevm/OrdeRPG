@@ -1,5 +1,5 @@
 from .db.models import ModelWorker
-from .db.peel import DbEngine
+from .db.managers import DbEngine
 
 
 ModelWorker.metadata.create_all(DbEngine)
