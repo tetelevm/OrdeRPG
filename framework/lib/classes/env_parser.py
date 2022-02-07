@@ -215,3 +215,24 @@ class EnvParser:
 
 
 env_parser = EnvParser()
+
+
+# `.configs` example
+_ = """
+# An example of a configuration file
+
+production = True
+debug = False
+test = False
+
+hash_algorithms = ['blake2b', 'sha3_256']
+"""
+
+# `.envs` example
+_ = """
+# An example of a envs file
+
+# This is the result of executing `sha256(b'example').hexdigest()`
+# please change this value.
+hash_salt = '50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c'
+"""
